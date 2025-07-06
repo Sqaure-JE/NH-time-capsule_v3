@@ -33,7 +33,7 @@ jobs:
       run: flutter config --enable-web
       
     - name: Build web
-      run: flutter build web --release --web-renderer html --base-href /NH-time-capsule_v2/
+      run: flutter build web --release --base-href /NH-time-capsule_v2/
       working-directory: ./
       
     - name: Deploy to GitHub Pages

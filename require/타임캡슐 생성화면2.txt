@@ -1,0 +1,302 @@
+import React, { useState } from 'react';
+import { ChevronLeft, Users, User, Camera, Gift, Plus, Target, Calendar } from 'lucide-react';
+
+export default function SimpleCapsuleCreate() {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    type: 'personal', // personal or group
+    category: '',
+    title: '',
+    targetAmount: '',
+    period: '',
+    firstMessage: ''
+  });
+
+  // 간소화된 카테고리 (아이콘 + 이름만)
+  const categories = [
+    { id: 'travel', icon: '🏖️', name: '여행', color: 'bg-blue-100 border-blue-300 text-blue-700' },
+    { id: 'financial', icon: '💰', name: '저축', color: 'bg-green-100 border-green-300 text-green-700' },
+    { id: 'home', icon: '🏠', name: '내집마련', color: 'bg-purple-100 border-purple-300 text-purple-700' },
+    { id: 'lifestyle', icon: '🎯', name: '취미생활', color: 'bg-orange-100 border-orange-300 text-orange-700' },
+    { id: 'relationship', icon: '💕', name: '특별한날', color: 'bg-pink-100 border-pink-300 text-pink-700' },
+    { id: 'other', icon: '✨', name: '기타', color: 'bg-gray-100 border-gray-300 text-gray-700' }
+  ];
+
+  const periods = [
+    { id: '3', label: '3개월', desc: '단기 목표' },
+    { id: '6', label: '6개월', desc: '추천' },
+    { id: '12', label: '1년', desc: '장기 목표' }
+  ];
+
+  const handleNext = () => {
+    if (step < 2) setStep(step + 1);
+  };
+
+  const handleCreate = () => {
+    // 생성 완료 처리
+    alert(`🎉 ${formData.title} 타임캡슐이 생성되었습니다!\n기본 100P + 첫 기록 50P 적립!`);
+  };
+
+  const isStep1Valid = formData.category && formData.title && formData.targetAmount && formData.period;
+  const isStep2Valid = true; // 2단계는 선택사항
+
+  return (
+    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
+      {/* 헤더 */}
+      <div className="bg-white shadow-sm">
+        <div className="flex items-center justify-between p-4">
+          <button className="p-2">
+            <ChevronLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-800">새 타임캡슐</div>
+            <div className="text-xs text-gray-500">
+              {step === 1 ? '기본 정보' : '첫 기록 (선택)'}
+            </div>
+          </div>
+          <div className="w-10"></div>
+        </div>
+
+        {/* 진행률 바 */}
+        <div className="px-4 pb-2">
+          <div className="w-full bg-gray-200 rounded-full h-1">
+            <div 
+              className="bg-green-500 h-1 rounded-full transition-all duration-300"
+              style={{ width: `${(step / 2) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      {step === 1 && (
+        <div className="p-4 space-y-6">
+          {/* 타입 선택 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">누구와 함께 하나요?</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setFormData({...formData, type: 'personal'})}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  formData.type === 'personal' 
+                    ? 'border-green-500 bg-green-50' 
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                <User className={`w-8 h-8 mx-auto mb-2 ${
+                  formData.type === 'personal' ? 'text-green-500' : 'text-gray-400'
+                }`} />
+                <div className="text-center">
+                  <div className="font-semibold text-gray-800">나 혼자</div>
+                  <div className="text-xs text-gray-500 mt-1">개인 목표</div>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setFormData({...formData, type: 'group'})}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  formData.type === 'group' 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                <Users className={`w-8 h-8 mx-auto mb-2 ${
+                  formData.type === 'group' ? 'text-blue-500' : 'text-gray-400'
+                }`} />
+                <div className="text-center">
+                  <div className="font-semibold text-gray-800">함께</div>
+                  <div className="text-xs text-gray-500 mt-1">모임 목표</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* 카테고리 선택 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">무엇을 위한 저축인가요?</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {categories.map(category => (
+                <button
+                  key={category.id}
+                  onClick={() => setFormData({...formData, category: category.id})}
+                  className={`p-3 rounded-xl border-2 transition-all text-center ${
+                    formData.category === category.id 
+                      ? category.color
+                      : 'border-gray-200 bg-white text-gray-600'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{category.icon}</div>
+                  <div className="text-xs font-medium">{category.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 제목 입력 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">타임캡슐 이름</h3>
+            <input
+              type="text"
+              placeholder="예: 제주도 여행 자금 모으기"
+              value={formData.title}
+              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <div className="text-xs text-gray-500 mt-2">
+              💡 구체적인 목표가 성공률을 높여요!
+            </div>
+          </div>
+
+          {/* 목표 금액 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">목표 금액</h3>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="1,000,000"
+                value={formData.targetAmount}
+                onChange={(e) => setFormData({...formData, targetAmount: e.target.value})}
+                className="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-right"
+              />
+              <span className="absolute right-3 top-3 text-gray-500">원</span>
+            </div>
+          </div>
+
+          {/* 기간 선택 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">언제까지 모을까요?</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {periods.map(period => (
+                <button
+                  key={period.id}
+                  onClick={() => setFormData({...formData, period: period.id})}
+                  className={`p-3 rounded-xl border-2 transition-all text-center ${
+                    formData.period === period.id 
+                      ? 'border-green-500 bg-green-50 text-green-700' 
+                      : 'border-gray-200 bg-white text-gray-600'
+                  }`}
+                >
+                  <div className="font-semibold">{period.label}</div>
+                  <div className="text-xs mt-1">{period.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 예상 리워드 */}
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4">
+            <div className="flex items-center space-x-3">
+              <Gift className="w-6 h-6 text-orange-600" />
+              <div>
+                <div className="font-bold text-gray-800">예상 적립 포인트</div>
+                <div className="text-sm text-gray-600">
+                  생성 100P + 매일 기록 50P + 달성 보너스 200P
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="p-4 space-y-6">
+          {/* 첫 기록 작성 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <div className="flex items-center space-x-2 mb-4">
+              <span className="text-2xl">😊</span>
+              <h3 className="font-bold text-gray-800">첫 번째 다짐을 남겨보세요</h3>
+            </div>
+            <textarea
+              placeholder="이 목표를 세운 이유나 각오를 자유롭게 적어보세요... (선택사항)"
+              value={formData.firstMessage}
+              onChange={(e) => setFormData({...formData, firstMessage: e.target.value})}
+              rows={4}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+            />
+          </div>
+
+          {/* 사진 추가 */}
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">사진 추가 (선택)</h3>
+            <button className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-green-500 transition-colors">
+              <Camera className="w-8 h-8 text-gray-400 mb-2" />
+              <span className="text-gray-500 font-medium">첫 추억 사진 추가</span>
+              <span className="text-xs text-gray-400 mt-1">+20P 추가 적립</span>
+            </button>
+          </div>
+
+          {/* 요약 정보 */}
+          <div className="bg-green-50 rounded-xl p-4">
+            <h4 className="font-bold text-gray-800 mb-3">📋 타임캡슐 요약</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">이름:</span>
+                <span className="font-medium">{formData.title}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">목표:</span>
+                <span className="font-medium">{formData.targetAmount}원</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">기간:</span>
+                <span className="font-medium">{formData.period}개월</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">유형:</span>
+                <span className="font-medium">
+                  {formData.type === 'personal' ? '개인형' : '모임형'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 하단 버튼 */}
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4">
+        <div className="flex space-x-3">
+          {step === 2 && (
+            <button
+              onClick={() => setStep(1)}
+              className="flex-1 py-3 px-4 border-2 border-gray-300 text-gray-600 rounded-lg font-semibold"
+            >
+              이전
+            </button>
+          )}
+          
+          {step === 1 ? (
+            <button
+              onClick={handleNext}
+              disabled={!isStep1Valid}
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold ${
+                isStep1Valid
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-300 text-gray-500'
+              }`}
+            >
+              다음 단계
+            </button>
+          ) : (
+            <button
+              onClick={handleCreate}
+              className="flex-1 py-3 px-4 bg-green-500 text-white rounded-lg font-semibold"
+            >
+              타임캡슐 만들기 🎉
+            </button>
+          )}
+        </div>
+        
+        {step === 2 && (
+          <button
+            onClick={handleCreate}
+            className="w-full mt-2 py-2 text-gray-600 text-sm"
+          >
+            첫 기록 건너뛰고 만들기
+          </button>
+        )}
+      </div>
+
+      {/* 하단 여백 */}
+      <div className="h-20"></div>
+    </div>
+  );
+}

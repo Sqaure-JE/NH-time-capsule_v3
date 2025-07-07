@@ -1,0 +1,392 @@
+import React, { useState } from 'react';
+import { ChevronLeft, Camera, Star, TrendingUp, Calendar, Target, Heart, Zap, Shield, Leaf, Gift } from 'lucide-react';
+
+export default function PersonalCapsuleDiary() {
+  const [selectedEmotion, setSelectedEmotion] = useState('');
+  const [amount, setAmount] = useState('');
+  const [content, setContent] = useState('');
+  const [hasImage, setHasImage] = useState(false);
+  const [milestone, setMilestone] = useState('');
+
+  // 5가지 감정 캐릭터 (레벨과 함께)
+  const emotions = [
+    { 
+      id: 'joy', 
+      emoji: '😊', 
+      name: '기쁨이', 
+      color: '#FFD700',
+      level: 8,
+      description: '목표에 한 걸음 더 가까워졌어요!'
+    },
+    { 
+      id: 'sadness', 
+      emoji: '😢', 
+      name: '슬픔이', 
+      color: '#4A90E2',
+      level: 4,
+      description: '힘든 순간도 성장의 기회예요.'
+    },
+    { 
+      id: 'anger', 
+      emoji: '😡', 
+      name: '분노', 
+      color: '#FF4444',
+      level: 3,
+      description: '불합리한 지출에 단호하게 대처해요.'
+    },
+    { 
+      id: 'fear', 
+      emoji: '😰', 
+      name: '불안이', 
+      color: '#9B59B6',
+      level: 6,
+      description: '신중한 계획으로 안전하게 진행해요.'
+    },
+    { 
+      id: 'disgust', 
+      emoji: '🤢', 
+      name: '까칠이', 
+      color: '#2ECC71',
+      level: 3,
+      description: '완벽한 목표 달성을 위해 꼼꼼히!'
+    }
+  ];
+
+  // 선택된 타임캡슐 정보
+  const currentCapsule = {
+    id: 'travel',
+    title: '🏖️ 제주도 여행 자금',
+    category: 'travel',
+    currentAmount: 1340000,
+    targetAmount: 1500000,
+    progress: 89,
+    daysLeft: 45,
+    startDate: '2025.01.01',
+    endDate: '2025.08.20',
+    recordCount: 23
+  };
+
+  // 이정표 옵션
+  const milestones = [
+    { id: 'saving', emoji: '💰', text: '저축했어요', bonus: 10 },
+    { id: 'sacrifice', emoji: '🚫', text: '참았어요', bonus: 15 },
+    { id: 'progress', emoji: '📈', text: '목표에 가까워졌어요', bonus: 20 },
+    { id: 'challenge', emoji: '💪', text: '어려움을 극복했어요', bonus: 25 }
+  ];
+
+  const selectedEmotionData = emotions.find(e => e.id === selectedEmotion);
+  const selectedMilestoneData = milestones.find(m => m.id === milestone);
+
+  const calculatePoints = () => {
+    let base = 50; // 기본 포인트
+    if (hasImage) base += 20;
+    if (selectedMilestoneData) base += selectedMilestoneData.bonus;
+    if (amount && parseInt(amount.replace(/,/g, '')) > 0) base += 15;
+    return base;
+  };
+
+  const handleSave = () => {
+    const points = calculatePoints();
+    const characterExp = Math.floor(points / 2); // 캐릭터 경험치
+    alert(`🎉 타임캡슐 일기가 저장되었습니다!\n${selectedEmotionData?.name} +${characterExp}EXP\n총 ${points}P 적립!`);
+  };
+
+  const formatAmount = (value) => {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const progressToTarget = Math.min((currentCapsule.currentAmount / currentCapsule.targetAmount) * 100, 100);
+  const remainingAmount = currentCapsule.targetAmount - currentCapsule.currentAmount;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 max-w-md mx-auto">
+      {/* 헤더 */}
+      <div className="bg-white shadow-sm">
+        <div className="flex items-center justify-between p-4">
+          <button className="p-2">
+            <ChevronLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-800">타임캡슐 일기</div>
+            <div className="text-xs text-gray-500">개인형 • 2025.07.06</div>
+          </div>
+          <button className="p-2">
+            <Calendar className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* 현재 타임캡슐 상태 */}
+        <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-xl p-5 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-bold">{currentCapsule.title}</h3>
+            <div className="bg-white/20 px-2 py-1 rounded-full">
+              <span className="text-xs font-medium">D-{currentCapsule.daysLeft}</span>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-white/90 text-sm">현재 진행률</span>
+              <span className="font-bold">{Math.round(progressToTarget)}%</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-3">
+              <div 
+                className="bg-white h-3 rounded-full transition-all duration-500"
+                style={{ width: `${progressToTarget}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-white/90">
+                {currentCapsule.currentAmount.toLocaleString()}원
+              </span>
+              <span className="text-white/90">
+                목표: {currentCapsule.targetAmount.toLocaleString()}원
+              </span>
+            </div>
+          </div>
+          
+          <div className="mt-3 pt-3 border-t border-white/20">
+            <div className="flex justify-between text-sm">
+              <span className="text-white/90">남은 금액</span>
+              <span className="font-bold">{remainingAmount.toLocaleString()}원</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 감정 캐릭터 선택 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">🎭 오늘 목표 달성 과정에서 느낀 감정</h3>
+          <div className="grid grid-cols-5 gap-2">
+            {emotions.map((emotion) => (
+              <button
+                key={emotion.id}
+                onClick={() => setSelectedEmotion(emotion.id)}
+                className={`p-3 rounded-xl transition-all duration-200 relative ${
+                  selectedEmotion === emotion.id 
+                    ? 'transform scale-110 shadow-lg' 
+                    : 'hover:scale-105'
+                }`}
+                style={{
+                  backgroundColor: selectedEmotion === emotion.id ? `${emotion.color}20` : '#f9f9f9',
+                  borderWidth: selectedEmotion === emotion.id ? '2px' : '1px',
+                  borderColor: selectedEmotion === emotion.id ? emotion.color : '#e5e5e5'
+                }}
+              >
+                <div className="text-2xl mb-1">{emotion.emoji}</div>
+                <div className="text-xs font-medium text-gray-700">{emotion.name}</div>
+                <div className="text-xs text-gray-500">Lv.{emotion.level}</div>
+                
+                {selectedEmotion === emotion.id && (
+                  <div className="absolute -top-1 -right-1">
+                    <div className="bg-yellow-400 rounded-full w-4 h-4 flex items-center justify-center">
+                      <Star className="w-2 h-2 text-white" />
+                    </div>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+          
+          {selectedEmotionData && (
+            <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: `${selectedEmotionData.color}15` }}>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold" style={{ color: selectedEmotionData.color }}>
+                  {selectedEmotionData.name} Lv.{selectedEmotionData.level}
+                </span>
+                <br />
+                {selectedEmotionData.description}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 오늘의 이정표 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">🏆 오늘의 이정표</h3>
+          <p className="text-xs text-gray-500 mb-3">목표 달성을 위해 한 특별한 행동이 있나요?</p>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {milestones.map((ms) => (
+              <button
+                key={ms.id}
+                onClick={() => setMilestone(milestone === ms.id ? '' : ms.id)}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  milestone === ms.id 
+                    ? 'border-green-500 bg-green-50 text-green-700' 
+                    : 'border-gray-200 bg-white text-gray-600'
+                }`}
+              >
+                <div className="text-xl mb-1">{ms.emoji}</div>
+                <div className="text-xs font-medium">{ms.text}</div>
+                <div className="text-xs text-green-600 mt-1">+{ms.bonus}P</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 금액 기록 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">💰 이 타임캡슐에 추가한 금액</h3>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="오늘 추가한 금액 (선택사항)"
+              value={amount}
+              onChange={(e) => setAmount(formatAmount(e.target.value.replace(/,/g, '')))}
+              className="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-right"
+            />
+            <span className="absolute right-3 top-3 text-gray-500">원</span>
+          </div>
+          
+          {amount && (
+            <div className="mt-2 p-2 bg-green-50 rounded-lg">
+              <div className="text-sm text-green-700">
+                <span className="font-medium">새로운 진행률: </span>
+                {Math.round(((currentCapsule.currentAmount + parseInt(amount.replace(/,/g, '') || '0')) / currentCapsule.targetAmount) * 100)}%
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 스토리 작성 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center space-x-2 mb-3">
+            {selectedEmotionData && <span className="text-xl">{selectedEmotionData.emoji}</span>}
+            <h3 className="font-bold text-gray-800">📖 목표 달성 스토리</h3>
+          </div>
+          
+          <textarea
+            placeholder={selectedEmotionData ? 
+              `${selectedEmotionData.name}와 함께 목표를 향한 오늘의 여정을 기록해보세요...` :
+              "제주도 여행 목표를 위해 오늘 어떤 일이 있었나요? 어떤 노력을 했나요?"
+            }
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+          />
+          
+          <div className="mt-2 text-xs text-gray-500">
+            💡 예시: "오늘 점심을 도시락으로 해서 5천원 절약했어. 여행 가는 날이 점점 가까워지는 게 실감나!"
+          </div>
+        </div>
+
+        {/* 추억 사진 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">📸 오늘의 추억</h3>
+          <button 
+            onClick={() => setHasImage(!hasImage)}
+            className="w-full h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-green-500 transition-colors"
+          >
+            {hasImage ? (
+              <div className="text-center">
+                <div className="w-20 h-16 bg-gradient-to-r from-green-200 to-blue-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                  🏖️
+                </div>
+                <span className="text-sm text-gray-600">목표와 관련된 사진 추가됨</span>
+              </div>
+            ) : (
+              <>
+                <Camera className="w-6 h-6 text-gray-400 mb-1" />
+                <span className="text-sm text-gray-500">목표 관련 사진 추가</span>
+                <span className="text-xs text-green-600 mt-1">+20P • 캐릭터 성장 보너스</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* 캐릭터 성장 & 포인트 */}
+        <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Gift className="w-5 h-5 text-orange-600" />
+              <span className="font-bold text-gray-800">타임캡슐 일기 리워드</span>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-orange-600">{calculatePoints()}P</div>
+              <div className="text-xs text-gray-600">포인트 적립</div>
+            </div>
+          </div>
+          
+          {selectedEmotionData && (
+            <div className="bg-white/60 rounded-lg p-3 mb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{selectedEmotionData.emoji}</span>
+                  <span className="font-medium text-gray-800">{selectedEmotionData.name}</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-purple-600">+{Math.floor(calculatePoints() / 2)}EXP</div>
+                  <div className="text-xs text-gray-600">경험치</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-1 text-xs text-gray-700">
+            <div className="flex justify-between">
+              <span>• 기본 타임캡슐 일기</span>
+              <span>50P</span>
+            </div>
+            {hasImage && (
+              <div className="flex justify-between">
+                <span>• 추억 사진 추가</span>
+                <span>+20P</span>
+              </div>
+            )}
+            {selectedMilestoneData && (
+              <div className="flex justify-between">
+                <span>• {selectedMilestoneData.text}</span>
+                <span>+{selectedMilestoneData.bonus}P</span>
+              </div>
+            )}
+            {amount && parseInt(amount.replace(/,/g, '')) > 0 && (
+              <div className="flex justify-between">
+                <span>• 금액 추가 기록</span>
+                <span>+15P</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 진행 현황 */}
+        <div className="bg-green-50 rounded-xl p-4">
+          <div className="text-center">
+            <h4 className="font-bold text-gray-800 mb-2">🎯 목표까지</h4>
+            <div className="text-2xl font-bold text-green-600 mb-1">
+              {remainingAmount.toLocaleString()}원
+            </div>
+            <div className="text-sm text-gray-600">
+              하루 평균 {Math.ceil(remainingAmount / currentCapsule.daysLeft).toLocaleString()}원씩!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 하단 저장 버튼 */}
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4">
+        <div className="flex space-x-3">
+          <button className="flex-1 py-3 px-4 border-2 border-gray-300 text-gray-600 rounded-lg font-semibold">
+            임시저장
+          </button>
+          <button 
+            onClick={handleSave}
+            disabled={!selectedEmotion}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold ${
+              selectedEmotion
+                ? 'bg-gradient-to-r from-green-500 to-blue-500 text-white'
+                : 'bg-gray-300 text-gray-500'
+            }`}
+          >
+            캡슐에 담기 🥚✨
+          </button>
+        </div>
+      </div>
+
+      {/* 하단 여백 */}
+      <div className="h-20"></div>
+    </div>
+  );
+}

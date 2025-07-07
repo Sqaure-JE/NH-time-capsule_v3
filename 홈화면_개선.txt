@@ -1,0 +1,417 @@
+import React, { useState } from 'react';
+import { Plus, Home, CreditCard, ShoppingBag, User, Star, Heart, Zap, Shield, Leaf, Calendar, TrendingUp } from 'lucide-react';
+
+// 캐릭터 데이터
+const emotionCharacters = [
+  { id: 'joy', emoji: '😊', name: '기쁨이', color: '#FFD700' },
+  { id: 'sadness', emoji: '😢', name: '슬픔이', color: '#4A90E2' },
+  { id: 'anger', emoji: '😡', name: '분노', color: '#FF4444' },
+  { id: 'fear', emoji: '😰', name: '불안이', color: '#9B59B6' },
+  { id: 'disgust', emoji: '🤢', name: '까칠이', color: '#2ECC71' }
+];
+
+// 목적 중심 카테고리
+const purposeCategories = [
+  { id: 'financial', emoji: '💰', name: '금융목표', color: '#4CAF50' },
+  { id: 'travel', emoji: '🏖️', name: '여행계획', color: '#2196F3' },
+  { id: 'lifestyle', emoji: '🎯', name: '라이프스타일', color: '#FF9800' },
+  { id: 'relationship', emoji: '💕', name: '인간관계', color: '#E91E63' },
+  { id: 'career', emoji: '📈', name: '커리어', color: '#9C27B0' },
+  { id: 'home', emoji: '🏠', name: '내집마련', color: '#607D8B' }
+];
+
+// 더미 타임캡슐 데이터
+const timeCapsules = [
+  {
+    id: 1,
+    title: '첫 월급 기념 저축',
+    category: 'financial',
+    mainEmotion: 'joy',
+    dDay: 45,
+    progress: 78,
+    amount: '2,340,000원',
+    target: '3,000,000원',
+    contentCount: 12,
+    type: 'personal'
+  },
+  {
+    id: 2,
+    title: '제주도 여행 계획',
+    category: 'travel',
+    mainEmotion: 'joy',
+    dDay: 0, // 열기 가능
+    progress: 100,
+    amount: '1,500,000원',
+    target: '1,500,000원',
+    contentCount: 23,
+    type: 'personal'
+  },
+  {
+    id: 3,
+    title: '대학 동기 모임비',
+    category: 'relationship',
+    mainEmotion: 'joy',
+    dDay: 12,
+    progress: 85,
+    amount: '450,000원',
+    target: '600,000원',
+    contentCount: 18,
+    type: 'group',
+    members: ['김민지', '이서연', '박준혁', '최예린']
+  },
+  {
+    id: 4,
+    title: '내 집 마련 1단계',
+    category: 'home',
+    mainEmotion: 'fear', // 불안이가 메인 (신중한 계획)
+    dDay: 365,
+    progress: 15,
+    amount: '15,000,000원',
+    target: '100,000,000원',
+    contentCount: 8,
+    type: 'personal'
+  }
+];
+
+export default function ImprovedHomeScreen() {
+  const [selectedBottomTab, setSelectedBottomTab] = useState(0);
+  const [selectedFilter, setSelectedFilter] = useState('all');
+
+  const openableCapsules = timeCapsules.filter(capsule => capsule.dDay <= 0);
+  const activeCapsules = timeCapsules.filter(capsule => capsule.dDay > 0);
+
+  const getFilteredCapsules = () => {
+    if (selectedFilter === 'all') return timeCapsules;
+    return timeCapsules.filter(capsule => capsule.category === selectedFilter);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* 헤더 */}
+      <div className="bg-white shadow-sm">
+        <div className="flex items-center justify-between p-4">
+          <button className="p-2 rounded-full hover:bg-gray-100">
+            <div className="w-6 h-6">←</div>
+          </button>
+          <h1 className="text-lg font-bold text-gray-800">금융 타임캡슐</h1>
+          <div className="flex space-x-2">
+            <button className="p-2 rounded-full hover:bg-gray-100">
+              <Home className="w-5 h-5" />
+            </button>
+            <button className="p-2 rounded-full hover:bg-gray-100">
+              <div className="w-5 h-5">☰</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-6">
+        {/* 상단 배너 */}
+        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-5 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold mb-1">캐릭터와 함께하는 금융 여정! ✨</h2>
+              <p className="text-green-100 text-sm mb-2">감정 기반 맞춤 금융 관리</p>
+              <p className="text-white font-semibold">누적 포인트: 2,450P 적립 중!</p>
+            </div>
+            <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center">
+              <span className="text-2xl">😊</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 캡슐 유형 섹션 */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-800">타임캡슐 유형</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-4 text-center">
+              <div className="text-3xl mb-2">👤</div>
+              <h4 className="font-bold text-gray-800 mb-1">개인형</h4>
+              <p className="text-xs text-gray-600 mb-3">나만의 금융일기와<br/>캐릭터 친구들</p>
+              <button className="bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                만들기
+              </button>
+            </div>
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-4 text-center">
+              <div className="text-3xl mb-2">👥</div>
+              <h4 className="font-bold text-gray-800 mb-1">모임형</h4>
+              <p className="text-xs text-gray-600 mb-3">친구들과 함께<br/>목표를 달성해요</p>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                만들기
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 서비스 정보 */}
+        <div className="bg-white rounded-xl p-5 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">캐릭터 기반 금융 관리 ✨</h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 text-lg">😊</span>
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 text-sm">5가지 감정 캐릭터와 함께</p>
+                <p className="text-xs text-gray-500">기쁨이, 슬픔이, 분노, 불안이, 까칠이</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 text-sm">감정 패턴 기반 맞춤 추천</p>
+                <p className="text-xs text-gray-500">AI가 분석한 개인화 금융상품</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <Star className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 text-sm">4단계 스토리텔링 오픈</p>
+                <p className="text-xs text-gray-500">감동적인 타임캡슐 열기 경험</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 카테고리 필터 */}
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 mb-3">목적별 타임캡슐 🎯</h3>
+          <div className="flex space-x-2 overflow-x-auto pb-2">
+            <button 
+              onClick={() => setSelectedFilter('all')}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+                selectedFilter === 'all' 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              전체
+            </button>
+            {purposeCategories.map(category => (
+              <button 
+                key={category.id}
+                onClick={() => setSelectedFilter(category.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center space-x-1 ${
+                  selectedFilter === category.id 
+                    ? 'text-white shadow-md' 
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+                style={{
+                  backgroundColor: selectedFilter === category.id ? category.color : undefined
+                }}
+              >
+                <span>{category.emoji}</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 열기 가능한 캡슐 */}
+        {openableCapsules.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 mb-3">🎉 열기 가능한 캡슐</h3>
+            <div className="space-y-3">
+              {openableCapsules.map(capsule => (
+                <CapsuleCard key={capsule.id} capsule={capsule} isOpenable={true} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 나의 타임캡슐 */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-bold text-gray-800">나의 타임캡슐 🥚</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {getFilteredCapsules().map(capsule => (
+              <CapsuleCard key={capsule.id} capsule={capsule} />
+            ))}
+          </div>
+        </div>
+
+        {/* 요약 정보 */}
+        <div className="bg-white/80 rounded-xl p-4 border border-gray-200">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="flex items-center justify-center mb-2">
+                <Calendar className="w-5 h-5 text-green-500" />
+              </div>
+              <p className="text-lg font-bold text-green-500">{timeCapsules.length}개</p>
+              <p className="text-xs text-gray-600">전체 캡슐</p>
+            </div>
+            <div>
+              <div className="flex items-center justify-center mb-2">
+                <Star className="w-5 h-5 text-orange-500" />
+              </div>
+              <p className="text-lg font-bold text-orange-500">{openableCapsules.length}개</p>
+              <p className="text-xs text-gray-600">D-DAY</p>
+            </div>
+            <div>
+              <div className="flex items-center justify-center mb-2">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+              </div>
+              <p className="text-lg font-bold text-blue-500">2,450P</p>
+              <p className="text-xs text-gray-600">총 포인트</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 포인트 배너 */}
+        <div className="bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl p-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">⭐</span>
+            <div>
+              <h4 className="font-bold text-gray-800">캐릭터 친구들과 포인트 적립! 🎉</h4>
+              <p className="text-sm text-gray-600">매일 기록하면 캐릭터가 성장하고 포인트도 쌓여요</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 하단 네비게이션 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="flex items-center justify-around py-2">
+          {[
+            { icon: Home, label: '홈', index: 0 },
+            { icon: CreditCard, label: '금융', index: 1 },
+            { icon: Plus, label: '', index: 2 }, // FAB
+            { icon: ShoppingBag, label: '쇼핑', index: 3 },
+            { icon: User, label: '마이', index: 4 }
+          ].map((item, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedBottomTab(item.index)}
+              className={`flex flex-col items-center py-2 px-4 ${
+                item.index === 2 ? 'relative' : ''
+              }`}
+            >
+              {item.index === 2 ? (
+                <div className="bg-green-500 rounded-full p-3 shadow-lg transform -translate-y-2">
+                  <Plus className="w-6 h-6 text-white" />
+                </div>
+              ) : (
+                <>
+                  <item.icon 
+                    className={`w-5 h-5 ${
+                      selectedBottomTab === item.index 
+                        ? 'text-green-500' 
+                        : 'text-gray-400'
+                    }`} 
+                  />
+                  <span className={`text-xs mt-1 ${
+                    selectedBottomTab === item.index 
+                      ? 'text-green-500 font-medium' 
+                      : 'text-gray-400'
+                  }`}>
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 하단 여백 */}
+      <div className="h-20"></div>
+    </div>
+  );
+}
+
+// 캡슐 카드 컴포넌트
+function CapsuleCard({ capsule, isOpenable = false }) {
+  const category = purposeCategories.find(cat => cat.id === capsule.category);
+  const mainEmotion = emotionCharacters.find(emotion => emotion.id === capsule.mainEmotion);
+  
+  const getProgressColor = () => {
+    if (capsule.progress >= 100) return 'bg-green-500';
+    if (capsule.progress >= 70) return 'bg-blue-500';
+    if (capsule.progress >= 30) return 'bg-yellow-500';
+    return 'bg-gray-400';
+  };
+
+  const getCardBackground = () => {
+    if (isOpenable) {
+      return 'bg-gradient-to-br from-yellow-100 to-orange-200 border-2 border-yellow-400';
+    }
+    return 'bg-white';
+  };
+
+  return (
+    <div className={`rounded-xl p-4 shadow-sm ${getCardBackground()}`}>
+      {/* 헤더 */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-2">
+          <span className="text-lg">{category?.emoji}</span>
+          <span className="text-lg">{mainEmotion?.emoji}</span>
+        </div>
+        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+          isOpenable 
+            ? 'bg-yellow-500 text-white animate-pulse' 
+            : capsule.dDay <= 7
+            ? 'bg-orange-100 text-orange-600'
+            : 'bg-gray-100 text-gray-600'
+        }`}>
+          {isOpenable ? '✨ 열어보세요!' : `D-${capsule.dDay}`}
+        </div>
+      </div>
+
+      {/* 제목 */}
+      <h4 className="font-bold text-gray-800 text-sm mb-2 line-clamp-2">
+        {capsule.title}
+      </h4>
+
+      {/* 타입별 정보 */}
+      {capsule.type === 'group' && (
+        <div className="mb-2">
+          <p className="text-xs text-gray-500">
+            👥 {capsule.members?.slice(0, 2).join(', ')}
+            {capsule.members && capsule.members.length > 2 && ` 외 ${capsule.members.length - 2}명`}
+          </p>
+        </div>
+      )}
+
+      {/* 진행률 */}
+      <div className="mb-3">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-gray-600">진행률</span>
+          <span className="text-xs font-bold text-gray-800">{capsule.progress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className={`h-2 rounded-full transition-all duration-500 ${getProgressColor()}`}
+            style={{ width: `${Math.min(capsule.progress, 100)}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* 금액 정보 */}
+      <div className="flex justify-between items-center text-xs mb-3">
+        <span className="text-gray-600">현재</span>
+        <span className="font-bold text-gray-800">{capsule.amount}</span>
+      </div>
+      <div className="flex justify-between items-center text-xs mb-3">
+        <span className="text-gray-600">목표</span>
+        <span className="text-gray-600">{capsule.target}</span>
+      </div>
+
+      {/* 콘텐츠 수 */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">📝 {capsule.contentCount}개 기록</span>
+        {isOpenable && (
+          <button className="bg-yellow-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+            열기
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

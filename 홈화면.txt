@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NH농협 올원뱅크 - 금융 타임캡슐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .header {
+            background: white;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header .logo {
+            color: #0066cc;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .nav-tab.active {
+            color: #00A651;
+            font-weight: 600;
+        }
+        
+        .nav-tab-icon {
+            font-size: 20px;
+        }
+        
+        .content {
+            padding: 20px 16px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .timecapsule-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .timecapsule-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .timecapsule-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .character-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .character {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        .character.joy { background: linear-gradient(45deg, #FFD700, #FFA500); }
+        .character.sadness { background: linear-gradient(45deg, #4A90E2, #2980B9); }
+        .character.anger { background: linear-gradient(45deg, #FF4444, #E74C3C); }
+        .character.fear { background: linear-gradient(45deg, #9B59B6, #8E44AD); }
+        .character.disgust { background: linear-gradient(45deg, #2ECC71, #27AE60); }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .timecapsule-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .type-card {
+            background: linear-gradient(135deg, #00A651, #27AE60);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .type-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .type-card.group {
+            background: linear-gradient(135deg, #3498DB, #2980B9);
+        }
+        
+        .type-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .type-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .type-desc {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .quick-actions {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .action-item {
+            background: white;
+            padding: 16px 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-item:hover {
+            border-color: #00A651;
+            transform: translateY(-2px);
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .action-text {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .ongoing-capsules {
+            margin-bottom: 30px;
+        }
+        
+        .capsule-item {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #00A651;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .capsule-item:hover {
+            transform: translateX(4px);
+        }
+        
+        .capsule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .capsule-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .capsule-period {
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        
+        .capsule-progress {
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00A651, #27AE60);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        .capsule-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00A651, #27AE60);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        
+        .menu-list {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .menu-icon.timecapsule {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+            color: white;
+        }
+        
+        .menu-text {
+            flex: 1;
+        }
+        
+        .menu-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        
+        .menu-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .menu-arrow {
+            font-size: 16px;
+            color: #ccc;
+        }
+        
+        .daily-finance {
+            margin-bottom: 20px;
+        }
+        
+        .finance-summary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .finance-amount {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .finance-change {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .emotion-quick-select {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .emotion-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .emotion-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .emotion-btn.joy { background: #FFD700; }
+        .emotion-btn.sadness { background: #4A90E2; color: white; }
+        .emotion-btn.anger { background: #FF4444; color: white; }
+        .emotion-btn.fear { background: #9B59B6; color: white; }
+        .emotion-btn.disgust { background: #2ECC71; color: white; }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <span>1:56</span>
+        <span>93%</span>
+    </div>
+    
+    <div class="header">
+        <div class="logo">NH마이데이터</div>
+        <div class="nav-tabs">
+            <div class="nav-tab" onclick="showPage('assets')">
+                <div class="nav-tab-icon">💰</div>
+                <div>자산</div>
+            </div>
+            <div class="nav-tab" onclick="showPage('spending')">
+                <div class="nav-tab-icon">💳</div>
+                <div>소비</div>
+            </div>
+            <div class="nav-tab active" onclick="showPage('timecapsule')">
+                <div class="nav-tab-icon">⏰</div>
+                <div>타임캡슐</div>
+            </div>
+            <div class="nav-tab" onclick="showPage('favorites')">
+                <div class="nav-tab-icon">⭐</div>
+                <div>즐겨찾기</div>
+            </div>
+            <div class="nav-tab" onclick="showPage('all')">
+                <div class="nav-tab-icon">📋</div>
+                <div>전체</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <!-- 타임캡슐 메인 페이지 -->
+        <div id="timecapsule" class="page active">
+            <div class="timecapsule-header">
+                <div class="timecapsule-title">금융 타임캡슐</div>
+                <div class="timecapsule-subtitle">목표와 감정을 함께 기록하는 특별한 여정</div>
+                
+                <div class="character-container">
+                    <div class="character joy">😊</div>
+                    <div class="character sadness">😢</div>
+                    <div class="character anger">😡</div>
+                    <div class="character fear">😰</div>
+                    <div class="character disgust">🤢</div>
+                </div>
+            </div>
+            
+            <div class="timecapsule-types">
+                <div class="type-card" onclick="showPersonalCapsule()">
+                    <div class="type-icon">👤</div>
+                    <div class="type-title">개인형</div>
+                    <div class="type-desc">나만의 금융 목표 여정</div>
+                </div>
+                <div class="type-card group" onclick="showGroupCapsule()">
+                    <div class="type-icon">👥</div>
+                    <div class="type-title">모임형</div>
+                    <div class="type-desc">함께하는 공동 목표</div>
+                </div>
+            </div>
+            
+            <div class="daily-finance">
+                <div class="section-title">오늘의 금융 일기</div>
+                <div class="finance-summary">
+                    <div class="finance-amount">+ 50,000원</div>
+                    <div class="finance-change">어제보다 15,000원 절약했어요!</div>
+                </div>
+                
+                <div class="emotion-quick-select">
+                    <button class="emotion-btn joy">😊</button>
+                    <button class="emotion-btn sadness">😢</button>
+                    <button class="emotion-btn anger">😡</button>
+                    <button class="emotion-btn fear">😰</button>
+                    <button class="emotion-btn disgust">🤢</button>
+                </div>
+            </div>
+            
+            <div class="ongoing-capsules">
+                <div class="section-title">진행 중인 타임캡슐</div>
+                
+                <div class="capsule-item">
+                    <div class="capsule-header">
+                        <div class="capsule-title">🏖️ 제주도 여행</div>
+                        <div class="capsule-period">3개월</div>
+                    </div>
+                    <div class="capsule-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="capsule-stats">
+                        <span>목표: 1,500,000원</span>
+                        <span>현재: 975,000원 (65%)</span>
+                    </div>
+                </div>
+                
+                <div class="capsule-item">
+                    <div class="capsule-header">
+                        <div class="capsule-title">💍 프로포즈 준비</div>
+                        <div class="capsule-period">6개월</div>
+                    </div>
+                    <div class="capsule-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    <div class="capsule-stats">
+                        <span>목표: 3,000,000원</span>
+                        <span>현재: 1,200,000원 (40%)</span>
+                    </div>
+                </div>
+                
+                <div class="capsule-item">
+                    <div class="capsule-header">
+                        <div class="capsule-title">👥 친구들과 유럽여행</div>
+                        <div class="capsule-period">1년</div>
+                    </div>
+                    <div class="capsule-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%"></div>
+                        </div>
+                    </div>
+                    <div class="capsule-stats">
+                        <span>목표: 5,000,000원</span>
+                        <span>현재: 1,250,000원 (25%)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="createNewCapsule()">
+                새로운 타임캡슐 만들기
+            </button>
+        </div>
+        
+        <!-- 자산 페이지 -->
+        <div id="assets" class="page">
+            <div class="card">
+                <h3>자산 현황</h3>
+                <p>기존 자산 관리 화면</p>
+            </div>
+        </div>
+        
+        <!-- 소비 페이지 -->
+        <div id="spending" class="page">
+            <div class="card">
+                <h3>소비 현황</h3>
+                <p>기존 소비 분석 화면</p>
+            </div>
+        </div>
+        
+        <!-- 즐겨찾기 페이지 -->
+        <div id="favorites" class="page">
+            <div class="card">
+                <h3>즐겨찾기</h3>
+                <p>기존 즐겨찾기 화면</p>
+            </div>
+        </div>
+        
+        <!-- 전체 메뉴 페이지 -->
+        <div id="all" class="page">
+            <div class="menu-list">
+                <div class="menu-item">
+                    <div class="menu-icon" style="background: #E8F5E8;">
+                        <span style="color: #00A651;">💰</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">자산</div>
+                        <div class="menu-desc">자산현황, 그때 그랬다면, 목표, 상품모아보기</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="menu-icon" style="background: #E3F2FD;">
+                        <span style="color: #2196F3;">💳</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">소비</div>
+                        <div class="menu-desc">소비현황, 머니캘린더, 소비패턴</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+                
+                <div class="menu-item" onclick="showPage('timecapsule')">
+                    <div class="menu-icon timecapsule">
+                        <span>⏰</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">금융 타임캡슐</div>
+                        <div class="menu-desc">목표와 감정을 기록하는 특별한 금융 여정</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="menu-icon" style="background: #F3E5F5;">
+                        <span style="color: #9C27B0;">📊</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">금융자산분석</div>
+                        <div class="menu-desc">자산진단, 연금진단, 조기은퇴진단</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="menu-icon" style="background: #E8F5E8;">
+                        <span style="color: #4CAF50;">📋</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">플래너</div>
+                        <div class="menu-desc">금융 플래너, 주택청약 플래너</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="menu-icon" style="background: #FFF3E0;">
+                        <span style="color: #FF9800;">🏥</span>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">헬스케어</div>
+                        <div class="menu-desc">나의 건강관리, 건강검진결과조회</div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showPage(pageId) {
+            // 모든 페이지 숨기기
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // 모든 탭 비활성화
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 선택된 페이지 보이기
+            document.getElementById(pageId).classList.add('active');
+            
+            // 해당 탭 활성화
+            const targetTab = document.querySelector(`[onclick="showPage('${pageId}')"]`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+        }
+        
+        function showPersonalCapsule() {
+            alert('개인형 타임캡슐 생성 화면으로 이동합니다.\n\n선택 가능한 카테고리:\n💰 금융목표\n🏖️ 여행계획\n🎯 라이프스타일\n💕 인간관계\n📈 커리어\n🏠 내집마련');
+        }
+        
+        function showGroupCapsule() {
+            alert('모임형 타임캡슐 생성 화면으로 이동합니다.\n\n선택 가능한 카테고리:\n✈️ 단체여행\n🏦 공동저축\n🎉 이벤트\n📚 스터디');
+        }
+        
+        function createNewCapsule() {
+            alert('새로운 타임캡슐을 만들어보세요!\n\n1. 개인형 또는 모임형 선택\n2. 카테고리 선택\n3. 목표 금액 및 기간 설정\n4. 첫 번째 기록 작성');
+        }
+        
+        // 감정 버튼 클릭 이벤트
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const emotions = {
+                    'joy': '기쁨이',
+                    'sadness': '슬픔이', 
+                    'anger': '분노',
+                    'fear': '불안이',
+                    'disgust': '까칠이'
+                };
+                
+                const emotionType = Array.from(this.classList).find(cls => emotions[cls]);
+                if (emotionType) {
+                    alert(`${emotions[emotionType]}와 함께 오늘의 금융 일기를 작성해보세요!`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

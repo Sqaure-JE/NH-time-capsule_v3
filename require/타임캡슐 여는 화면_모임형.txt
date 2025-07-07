@@ -1,0 +1,427 @@
+import React, { useState, useEffect } from 'react';
+import { Users, Calculator, PieChart, Download, Share2, TrendingUp, Award, Calendar, DollarSign } from 'lucide-react';
+
+export default function GroupCapsuleOpen() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [showImages, setShowImages] = useState(false);
+
+  // 모임형 타임캡슐 데이터
+  const capsuleData = {
+    title: '✈️ 친구들과 유럽여행',
+    category: 'travel',
+    period: '1년',
+    startDate: '2025.01.01',
+    endDate: '2025.12.31',
+    targetAmount: 20000000,
+    finalAmount: 21500000,
+    achievementRate: 107.5,
+    memberCount: 4,
+    totalRecords: 96,
+    totalExpenses: 2800000,
+    members: [
+      { 
+        id: 'member1', 
+        name: '이정은', 
+        avatar: '👤', 
+        contribution: 5600000, 
+        percentage: 26.0,
+        rank: 1,
+        records: 28,
+        isMe: true
+      },
+      { 
+        id: 'member2', 
+        name: '김혜진', 
+        avatar: '👩', 
+        contribution: 5400000, 
+        percentage: 25.1,
+        rank: 2,
+        records: 25
+      },
+      { 
+        id: 'member3', 
+        name: '김수름', 
+        avatar: '👨', 
+        contribution: 5300000, 
+        percentage: 24.7,
+        rank: 3,
+        records: 22
+      },
+      { 
+        id: 'member4', 
+        name: '한지혜', 
+        avatar: '👩‍🦱', 
+        contribution: 5200000, 
+        percentage: 24.2,
+        rank: 4,
+        records: 21
+      }
+    ],
+    expenseBreakdown: [
+      { category: '항공료', amount: 8000000, percentage: 37.2, emoji: '✈️' },
+      { category: '숙박비', amount: 6000000, percentage: 27.9, emoji: '🏨' },
+      { category: '여행자보험', amount: 1200000, percentage: 5.6, emoji: '🛡️' },
+      { category: '기타준비', amount: 2300000, percentage: 10.7, emoji: '🎒' },
+      { category: '예비자금', amount: 4000000, percentage: 18.6, emoji: '💰' }
+    ],
+    milestones: [
+      { date: '2025.03.15', title: '항공료 예약 완료', amount: '8,000,000원', members: 4 },
+      { date: '2025.06.20', title: '숙박 예약 완료', amount: '6,000,000원', members: 4 },
+      { date: '2025.09.10', title: '목표 금액 달성', amount: '20,000,000원', members: 4 },
+      { date: '2025.12.31', title: '최종 목표 초과', amount: '21,500,000원', members: 4 }
+    ],
+    groupAchievements: [
+      { icon: '🏆', title: '팀워크상', desc: '목표 107% 달성' },
+      { icon: '📊', title: '투명경영상', desc: '96회 투명한 기록' },
+      { icon: '💪', title: '꾸준함상', desc: '1년간 지속' },
+      { icon: '✈️', title: '여행준비완료', desc: '모든 예약 완료' }
+    ]
+  };
+
+  useEffect(() => {
+    // 3초 후 자동으로 다음 단계
+    const timer = setTimeout(() => {
+      if (currentStep === 0) {
+        setCurrentStep(1);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
+  const nextStep = () => {
+    if (currentStep < 2) {
+      setAnimating(true);
+      setTimeout(() => {
+        setCurrentStep(currentStep + 1);
+        setAnimating(false);
+      }, 300);
+    }
+  };
+
+  const toggleImages = () => {
+    setShowImages(!showImages);
+  };
+
+  const handleShare = () => {
+    alert('📱 모임 성과가 그룹 채팅방에 공유되었습니다!\n모든 멤버가 확인할 수 있어요!');
+  };
+
+  const handleDownload = () => {
+    alert('📊 모임 정산서 및 상세 리포트가 다운로드되었습니다!\n여행 준비 완료!');
+  };
+
+  const myData = capsuleData.members.find(m => m.isMe);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-200 max-w-md mx-auto">
+      {/* Step 0: 타임캡슐 열기 애니메이션 (공통) */}
+      {currentStep === 0 && (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6">
+          <div className={`transition-all duration-1000 ${animating ? 'opacity-0' : 'opacity-100'}`}>
+            {/* 이미지 교체 버튼 */}
+            <button 
+              onClick={toggleImages}
+              className="w-full mb-6"
+            >
+              <div className="w-64 h-64 mx-auto bg-gradient-to-br from-blue-200 to-purple-300 rounded-full flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform">
+                {showImages ? (
+                  <div className="text-center">
+                    <div className="text-6xl mb-2">✈️</div>
+                    <div className="text-lg font-bold text-gray-800">유럽여행!</div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-6xl mb-2 animate-bounce">🥚</div>
+                    <div className="text-lg font-bold text-gray-800">타임캡슐</div>
+                  </div>
+                )}
+              </div>
+            </button>
+
+            <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                따란! 타임캡슐이 열렸어요! 🎉
+              </h1>
+              <p className="text-gray-600 mb-4">
+                <span className="font-bold text-blue-600">{capsuleData.memberCount}명</span>이 
+                <span className="font-bold text-purple-600"> {capsuleData.period}</span>간 
+                함께한 특별한 여정이 완성되었습니다
+              </p>
+              <div className="text-sm text-gray-500">
+                {capsuleData.startDate} ~ {capsuleData.endDate}
+              </div>
+            </div>
+
+            <button 
+              onClick={nextStep}
+              className="mt-8 w-full bg-gradient-to-r from-blue-400 to-purple-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg"
+            >
+              모임 성과 확인하기 👥
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 1: 모임 성과 및 멤버별 기여도 */}
+      {currentStep === 1 && (
+        <div className={`min-h-screen p-4 transition-opacity duration-300 ${animating ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="text-center mb-6 pt-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">👥 모임 성과</h2>
+            <p className="text-gray-600">함께 이뤄낸 놀라운 결과</p>
+          </div>
+
+          {/* 전체 목표 달성 현황 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">🎯 전체 달성 현황</h3>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">목표 금액</span>
+                <span className="font-bold text-gray-800">{capsuleData.targetAmount.toLocaleString()}원</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">최종 달성</span>
+                <span className="font-bold text-blue-600">{capsuleData.finalAmount.toLocaleString()}원</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">달성률</span>
+                <span className="font-bold text-blue-600">{capsuleData.achievementRate}%</span>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  +{(capsuleData.finalAmount - capsuleData.targetAmount).toLocaleString()}원
+                </div>
+                <div className="text-sm text-blue-700">목표 초과 달성! 팀워크 최고! 🎉</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 멤버별 기여도 순위 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">🏆 멤버별 기여도</h3>
+            
+            <div className="space-y-3">
+              {capsuleData.members.map((member, index) => (
+                <div key={member.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                  member.isMe ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                      member.rank === 1 ? 'bg-yellow-500' : 
+                      member.rank === 2 ? 'bg-gray-400' : 
+                      member.rank === 3 ? 'bg-orange-600' : 'bg-gray-500'
+                    }`}>
+                      {member.rank}
+                    </div>
+                    <span className="text-lg">{member.avatar}</span>
+                    <div>
+                      <div className="font-medium text-gray-800">
+                        {member.name} {member.isMe && '(나)'}
+                      </div>
+                      <div className="text-xs text-gray-500">{member.records}회 기록</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-gray-800">
+                      {member.contribution.toLocaleString()}원
+                    </div>
+                    <div className="text-xs text-gray-500">{member.percentage}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {myData && (
+              <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+                <div className="text-center">
+                  <div className="font-bold text-blue-800">
+                    나의 순위: {myData.rank}위 🏆
+                  </div>
+                  <div className="text-sm text-blue-600">
+                    전체의 {myData.percentage}% 기여
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 주요 마일스톤 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">📅 주요 마일스톤</h3>
+            
+            <div className="space-y-3">
+              {capsuleData.milestones.map((milestone, index) => (
+                <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">{index + 1}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-800">{milestone.title}</div>
+                    <div className="text-xs text-gray-500">{milestone.date}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-green-600">{milestone.amount}</div>
+                    <div className="text-xs text-gray-500">👥 {milestone.members}명</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button 
+            onClick={nextStep}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-xl font-bold shadow-lg"
+          >
+            상세 분석 보기 📊
+          </button>
+        </div>
+      )}
+
+      {/* Step 2: 상세 분석 및 정산 정보 */}
+      {currentStep === 2 && (
+        <div className={`min-h-screen p-4 transition-opacity duration-300 ${animating ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="text-center mb-6 pt-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">📊 상세 분석</h2>
+            <p className="text-gray-600">투명한 모임 관리 결과</p>
+          </div>
+
+          {/* 비용 구성 분석 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">💰 비용 구성</h3>
+            
+            <div className="space-y-3">
+              {capsuleData.expenseBreakdown.map((expense, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <span className="text-xl">{expense.emoji}</span>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-gray-800">{expense.category}</span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {expense.amount.toLocaleString()}원
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-1000"
+                        style={{ width: `${expense.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{expense.percentage}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 모임 성취 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">🏆 모임 성취</h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {capsuleData.groupAchievements.map((achievement, index) => (
+                <div key={index} className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 rounded-lg text-center">
+                  <div className="text-2xl mb-2">{achievement.icon}</div>
+                  <div className="font-bold text-gray-800 text-sm">{achievement.title}</div>
+                  <div className="text-xs text-gray-600 mt-1">{achievement.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 활동 통계 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">📈 활동 통계</h3>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{capsuleData.totalRecords}회</div>
+                <div className="text-sm text-gray-600">총 기록</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{capsuleData.memberCount}명</div>
+                <div className="text-sm text-gray-600">참여 멤버</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{Math.round(capsuleData.totalRecords / capsuleData.memberCount)}</div>
+                <div className="text-sm text-gray-600">평균 기록</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 최종 정산 정보 */}
+          <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-6 mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">💳 최종 정산</h3>
+            
+            <div className="bg-white/60 rounded-lg p-4 mb-3">
+              <div className="text-center">
+                <div className="text-xl font-bold text-green-600 mb-2">
+                  정산 완료! ✅
+                </div>
+                <div className="text-sm text-gray-700">
+                  모든 멤버가 동일하게 기여했습니다
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-700">1인당 최종 부담금:</span>
+                <span className="font-bold text-gray-800">
+                  {Math.round(capsuleData.finalAmount / capsuleData.memberCount).toLocaleString()}원
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-700">여행 예산 여유분:</span>
+                <span className="font-bold text-green-600">
+                  {(capsuleData.finalAmount - capsuleData.targetAmount).toLocaleString()}원
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 여행 준비 완료 */}
+          <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-6 mb-6">
+            <div className="flex items-center space-x-3 mb-3">
+              <span className="text-2xl">✈️</span>
+              <h3 className="text-lg font-bold text-gray-800">여행 준비 완료!</h3>
+            </div>
+            <p className="text-gray-700 mb-4">
+              모든 예약이 완료되었고 예산도 충분해요!<br/>
+              이제 떠날 일만 남았습니다! 🎉
+            </p>
+            <button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-lg font-semibold">
+              새로운 모임 만들기 ✨
+            </button>
+          </div>
+
+          {/* 공유 및 저장 버튼들 */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <button 
+              onClick={handleShare}
+              className="flex items-center justify-center space-x-2 bg-blue-500 text-white py-3 rounded-lg font-semibold"
+            >
+              <Share2 className="w-5 h-5" />
+              <span>그룹 공유</span>
+            </button>
+            <button 
+              onClick={handleDownload}
+              className="flex items-center justify-center space-x-2 bg-green-500 text-white py-3 rounded-lg font-semibold"
+            >
+              <Download className="w-5 h-5" />
+              <span>정산서 저장</span>
+            </button>
+          </div>
+
+          {/* 홈으로 돌아가기 */}
+          <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold">
+            홈으로 돌아가기
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

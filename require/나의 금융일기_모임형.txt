@@ -1,0 +1,431 @@
+import React, { useState } from 'react';
+import { ChevronLeft, Users, Calculator, Receipt, Camera, DollarSign, PieChart, Bell, CheckCircle, AlertCircle } from 'lucide-react';
+
+export default function GroupCapsuleDiary() {
+  const [transactionType, setTransactionType] = useState('contribution');
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [hasReceipt, setHasReceipt] = useState(false);
+  const [splitMethod, setSplitMethod] = useState('equal');
+  const [selectedMembers, setSelectedMembers] = useState([]);
+
+  // 현재 모임형 타임캡슐 정보
+  const currentGroupCapsule = {
+    id: 'group_travel',
+    title: '✈️ 친구들과 유럽여행',
+    category: 'travel',
+    totalTarget: 20000000, // 2천만원
+    currentTotal: 12500000,
+    progress: 62.5,
+    daysLeft: 180,
+    memberCount: 4,
+    myContribution: 3200000,
+    startDate: '2025.01.01',
+    endDate: '2025.12.31'
+  };
+
+  // 모임원 정보
+  const members = [
+    { id: 'me', name: '이정은', contribution: 3200000, percentage: 25.6, avatar: '👤', isMe: true },
+    { id: 'member1', name: '김혜진', contribution: 3100000, percentage: 24.8, avatar: '👩' },
+    { id: 'member2', name: '김수름', contribution: 3000000, percentage: 24.0, avatar: '👨' },
+    { id: 'member3', name: '한지혜', contribution: 3200000, percentage: 25.6, avatar: '👩‍🦱' }
+  ];
+
+  // 거래 유형
+  const transactionTypes = [
+    { id: 'contribution', name: '개인 기여', icon: '💰', desc: '각자 목표 금액에 추가' },
+    { id: 'expense', name: '공동 지출', icon: '🛒', desc: '모임 관련 비용 지출' },
+    { id: 'refund', name: '환급/정산', icon: '↩️', desc: '비용 되돌려받기' }
+  ];
+
+  // 카테고리 (거래 유형별)
+  const categories = {
+    contribution: [
+      { id: 'monthly', name: '정기 적립', emoji: '📅' },
+      { id: 'bonus', name: '보너스 추가', emoji: '🎁' },
+      { id: 'extra', name: '임시 추가', emoji: '💪' }
+    ],
+    expense: [
+      { id: 'booking', name: '예약금', emoji: '🏨' },
+      { id: 'transport', name: '교통비', emoji: '✈️' },
+      { id: 'activity', name: '액티비티', emoji: '🎢' },
+      { id: 'meal', name: '식비', emoji: '🍽️' },
+      { id: 'shopping', name: '쇼핑', emoji: '🛍️' },
+      { id: 'other', name: '기타', emoji: '📝' }
+    ],
+    refund: [
+      { id: 'cancel', name: '취소 환급', emoji: '❌' },
+      { id: 'overpay', name: '초과 지불', emoji: '💸' },
+      { id: 'settle', name: '정산', emoji: '⚖️' }
+    ]
+  };
+
+  // 분할 방법
+  const splitMethods = [
+    { id: 'equal', name: '균등 분할', desc: '모든 멤버가 동일하게' },
+    { id: 'custom', name: '개별 설정', desc: '멤버별 다른 금액' },
+    { id: 'exclude', name: '일부만', desc: '참여한 멤버만' }
+  ];
+
+  const currentCategories = categories[transactionType] || [];
+  const myData = members.find(m => m.isMe);
+
+  const calculateNewProgress = () => {
+    if (transactionType === 'contribution' && amount) {
+      const newTotal = currentGroupCapsule.currentTotal + parseInt(amount.replace(/,/g, '') || '0');
+      return Math.min((newTotal / currentGroupCapsule.totalTarget) * 100, 100);
+    }
+    return currentGroupCapsule.progress;
+  };
+
+  const handleMemberToggle = (memberId) => {
+    setSelectedMembers(prev => 
+      prev.includes(memberId) 
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    );
+  };
+
+  const handleSave = () => {
+    const points = 25 + (hasReceipt ? 15 : 0) + (transactionType === 'expense' ? 10 : 0);
+    alert(`💾 모임 기록이 저장되었습니다!\n모든 멤버에게 알림 발송\n${points}P 적립!`);
+  };
+
+  const formatAmount = (value) => {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
+      {/* 헤더 */}
+      <div className="bg-white shadow-sm">
+        <div className="flex items-center justify-between p-4">
+          <button className="p-2">
+            <ChevronLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-800">모임 기록</div>
+            <div className="text-xs text-gray-500">모든 멤버 공유 • 2025.07.06</div>
+          </div>
+          <button className="p-2">
+            <Users className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* 모임 타임캡슐 현황 */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-5 text-white">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-bold">{currentGroupCapsule.title}</h3>
+            <div className="bg-white/20 px-2 py-1 rounded-full">
+              <span className="text-xs font-medium">👥 {currentGroupCapsule.memberCount}명</span>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-white/90 text-sm">전체 진행률</span>
+              <span className="font-bold">{Math.round(currentGroupCapsule.progress)}%</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-3">
+              <div 
+                className="bg-white h-3 rounded-full transition-all duration-500"
+                style={{ width: `${currentGroupCapsule.progress}%` }}
+              ></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-white/70">현재 총액</div>
+                <div className="font-bold">{currentGroupCapsule.currentTotal.toLocaleString()}원</div>
+              </div>
+              <div>
+                <div className="text-white/70">목표 총액</div>
+                <div className="font-bold">{currentGroupCapsule.totalTarget.toLocaleString()}원</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 멤버별 기여도 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-gray-800">👥 멤버별 기여도</h3>
+            <button className="text-blue-600 text-sm font-medium">상세보기</button>
+          </div>
+          
+          <div className="space-y-2">
+            {members.map((member) => (
+              <div key={member.id} className={`flex items-center justify-between p-2 rounded-lg ${
+                member.isMe ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{member.avatar}</span>
+                  <div>
+                    <span className="font-medium text-gray-800">
+                      {member.name} {member.isMe && '(나)'}
+                    </span>
+                    <div className="text-xs text-gray-500">{member.percentage}%</div>
+                  </div>
+                </div>
+                <span className="font-bold text-gray-700">
+                  {member.contribution.toLocaleString()}원
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 거래 유형 선택 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">📝 어떤 기록인가요?</h3>
+          
+          <div className="space-y-2">
+            {transactionTypes.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setTransactionType(type.id)}
+                className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                  transactionType === type.id 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl">{type.icon}</span>
+                  <div>
+                    <div className="font-medium text-gray-800">{type.name}</div>
+                    <div className="text-xs text-gray-500">{type.desc}</div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 카테고리 선택 */}
+        {currentCategories.length > 0 && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-3">🏷️ 세부 카테고리</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {currentCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategory(cat.id)}
+                  className={`p-3 rounded-lg border-2 transition-all text-center ${
+                    category === cat.id 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-gray-200 bg-white text-gray-600'
+                  }`}
+                >
+                  <div className="text-lg mb-1">{cat.emoji}</div>
+                  <div className="text-xs font-medium">{cat.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 금액 입력 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">💰 금액</h3>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="금액을 입력하세요"
+              value={amount}
+              onChange={(e) => setAmount(formatAmount(e.target.value.replace(/,/g, '')))}
+              className="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right text-lg font-semibold"
+            />
+            <span className="absolute right-3 top-3 text-gray-500">원</span>
+          </div>
+          
+          {transactionType === 'contribution' && amount && (
+            <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+              <div className="text-sm text-blue-700">
+                <span className="font-medium">새로운 전체 진행률: </span>
+                {Math.round(calculateNewProgress())}%
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 공동 지출일 때 분할 방법 */}
+        {transactionType === 'expense' && (
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-3">⚖️ 비용 분할 방법</h3>
+            
+            <div className="space-y-2 mb-3">
+              {splitMethods.map((method) => (
+                <button
+                  key={method.id}
+                  onClick={() => setSplitMethod(method.id)}
+                  className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                    splitMethod === method.id 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-gray-200 bg-white'
+                  }`}
+                >
+                  <div className="font-medium text-gray-800">{method.name}</div>
+                  <div className="text-xs text-gray-500">{method.desc}</div>
+                </button>
+              ))}
+            </div>
+
+            {splitMethod === 'exclude' && (
+              <div>
+                <h4 className="font-medium text-gray-800 mb-2">참여 멤버 선택</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {members.map((member) => (
+                    <button
+                      key={member.id}
+                      onClick={() => handleMemberToggle(member.id)}
+                      className={`p-2 rounded-lg border-2 transition-all ${
+                        selectedMembers.includes(member.id) 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg">{member.avatar}</span>
+                        <span className="text-sm font-medium">{member.name}</span>
+                        {selectedMembers.includes(member.id) && (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 내용 입력 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">📄 상세 내용</h3>
+          <textarea
+            placeholder="모임원들이 볼 수 있는 내용을 입력하세요... (구체적으로 작성하면 투명성이 높아져요)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          />
+          <div className="mt-2 text-xs text-gray-500">
+            💡 예시: "호텔 예약금 결제 완료 - 로마 4성급 호텔 3박"
+          </div>
+        </div>
+
+        {/* 영수증/증빙 첨부 */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-gray-800 mb-3">🧾 영수증 첨부</h3>
+          <button 
+            onClick={() => setHasReceipt(!hasReceipt)}
+            className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:border-blue-500 transition-colors"
+          >
+            {hasReceipt ? (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                  <Receipt className="w-8 h-8 text-blue-600" />
+                </div>
+                <span className="text-sm text-gray-600">영수증 첨부됨</span>
+              </div>
+            ) : (
+              <>
+                <Camera className="w-6 h-6 text-gray-400 mb-1" />
+                <span className="text-sm text-gray-500">영수증/증빙 첨부</span>
+                <span className="text-xs text-blue-600 mt-1">+15P • 투명성 보너스</span>
+              </>
+            )}
+          </button>
+          
+          <div className="mt-2 p-2 bg-yellow-50 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 text-yellow-600" />
+              <span className="text-xs text-yellow-700">
+                공동 지출은 영수증 첨부를 권장합니다
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 알림 설정 */}
+        <div className="bg-blue-50 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Bell className="w-5 h-5 text-blue-600" />
+              <span className="font-medium text-gray-800">멤버 알림</span>
+            </div>
+            <div className="text-right">
+              <div className="text-sm font-bold text-blue-600">자동 발송</div>
+              <div className="text-xs text-gray-600">모든 멤버에게</div>
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-gray-600">
+            기록 저장시 모든 모임원에게 푸시 알림이 발송됩니다
+          </div>
+        </div>
+
+        {/* 포인트 정보 */}
+        <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              <span className="font-bold text-gray-800">모임 기록 포인트</span>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-green-600">
+                {25 + (hasReceipt ? 15 : 0) + (transactionType === 'expense' ? 10 : 0)}P
+              </div>
+              <div className="text-xs text-gray-600">개인 적립</div>
+            </div>
+          </div>
+          
+          <div className="mt-2 space-y-1 text-xs text-gray-700">
+            <div className="flex justify-between">
+              <span>• 기본 모임 기록</span>
+              <span>25P</span>
+            </div>
+            {hasReceipt && (
+              <div className="flex justify-between">
+                <span>• 영수증 첨부</span>
+                <span>+15P</span>
+              </div>
+            )}
+            {transactionType === 'expense' && (
+              <div className="flex justify-between">
+                <span>• 공동 지출 관리</span>
+                <span>+10P</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 하단 저장 버튼 */}
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4">
+        <div className="flex space-x-3">
+          <button className="flex-1 py-3 px-4 border-2 border-gray-300 text-gray-600 rounded-lg font-semibold">
+            임시저장
+          </button>
+          <button 
+            onClick={handleSave}
+            disabled={!amount || !description}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold ${
+              amount && description
+                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                : 'bg-gray-300 text-gray-500'
+            }`}
+          >
+            모임에 기록하기 👥
+          </button>
+        </div>
+      </div>
+
+      {/* 하단 여백 */}
+      <div className="h-20"></div>
+    </div>
+  );
+}

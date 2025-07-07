@@ -1105,523 +1105,26 @@ class _NHHomeScreenState extends State<NHHomeScreen> {
   void _showAllCapsules() {
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          int selectedTab = 0; // 0: 열기 가능, 1: 진행중
-
-          final openableCapsules = capsules.where((c) => c.isOpenable).toList();
-          final activeCapsules = capsules
-              .where((c) => c.status == CapsuleStatus.active && !c.isAchieved)
-              .toList();
-
-          print('전체 캡슐 수: ${capsules.length}');
-          print('열기 가능한 캡슐 수: ${openableCapsules.length}');
-          print('진행중인 캡슐 수: ${activeCapsules.length}');
-          print('진행중 캡슐들: ${activeCapsules.map((c) => c.title).toList()}');
-
-          return Dialog(
-            child: Container(
-              width: double.maxFinite,
-              height: MediaQuery.of(context).size.height * 0.95,
-              child: Column(
-                children: [
-                  // 헤더
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      color: NHColors.white,
-                      border:
-                          Border(bottom: BorderSide(color: NHColors.gray200)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          '전체 타임캡슐',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: NHColors.gray800,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // 탭 버튼
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: NHColors.gray50,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              print('열기 가능 탭 클릭됨');
-                              setState(() => selectedTab = 0);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: selectedTab == 0
-                                    ? NHColors.primary
-                                    : NHColors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: selectedTab == 0
-                                      ? NHColors.primary
-                                      : NHColors.gray300,
-                                ),
-                              ),
-                              child: Text(
-                                '🎉 열기 가능 (${openableCapsules.length})',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: selectedTab == 0
-                                      ? Colors.white
-                                      : NHColors.gray600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              print('진행중 탭 클릭됨');
-                              setState(() => selectedTab = 1);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: selectedTab == 1
-                                    ? NHColors.primary
-                                    : NHColors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: selectedTab == 1
-                                      ? NHColors.primary
-                                      : NHColors.gray300,
-                                ),
-                              ),
-                              child: Text(
-                                '⏳ 진행중 (${activeCapsules.length})',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: selectedTab == 1
-                                      ? Colors.white
-                                      : NHColors.gray600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // 컨텐츠
-                  Expanded(
-                    child: selectedTab == 0
-                        ? _buildOpenableCapsulesList(openableCapsules)
-                        : _buildActiveCapsulesList(activeCapsules),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+      builder: (context) => _AllCapsulesDialog(capsules: capsules),
     );
   }
 
-  Widget _buildTabButton(String text, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? NHColors.primary : NHColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? NHColors.primary : NHColors.gray300,
-          ),
+  void _navigateToCapsuleDiary(TimeCapsule capsule) {
+    if (capsule.type == CapsuleType.personal) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PersonalCapsuleDiaryScreen(capsule: capsule),
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : NHColors.gray600,
-          ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GroupCapsuleDiaryScreen(capsule: capsule),
         ),
-      ),
-    );
-  }
-
-  Widget _buildOpenableCapsulesList(List<TimeCapsule> capsules) {
-    if (capsules.isEmpty) {
-      return _buildEmptyState(
-        '🎉',
-        '열기 가능한 타임캡슐이 없어요',
-        '목표를 달성한 타임캡슐이 여기에 표시됩니다',
       );
     }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: capsules.length,
-      itemBuilder: (context, index) {
-        final capsule = capsules[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: _buildCompactOpenableCard(capsule),
-        );
-      },
-    );
-  }
-
-  Widget _buildActiveCapsulesList(List<TimeCapsule> capsules) {
-    if (capsules.isEmpty) {
-      return _buildEmptyState(
-        '⏳',
-        '진행중인 타임캡슐이 없어요',
-        '새로운 타임캡슐을 만들어보세요!',
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: capsules.length,
-      itemBuilder: (context, index) {
-        final capsule = capsules[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: _buildCompactActiveCard(capsule),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyState(String emoji, String title, String subtitle) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 48),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: NHColors.gray800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 14,
-              color: NHColors.gray600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactOpenableCard(TimeCapsule capsule) {
-    return GestureDetector(
-      onTap: () async {
-        Navigator.pop(context);
-        if (capsule.type == CapsuleType.personal) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PersonalCapsuleOpenScreen(capsule: capsule),
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GroupCapsuleOpenScreen(capsule: capsule),
-            ),
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: NHColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: NHColors.primary.withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: NHColors.gray200.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // 아이콘
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: NHColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  capsule.categoryIcon,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // 내용
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          capsule.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: NHColors.gray800,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: capsule.type == CapsuleType.personal
-                              ? NHColors.blue.withOpacity(0.1)
-                              : NHColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          capsule.type == CapsuleType.personal ? '개인형' : '모임형',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: capsule.type == CapsuleType.personal
-                                ? NHColors.blue
-                                : NHColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '목표 달성! 🎉 ${capsule.progressPercentage}% 완료',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: NHColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 화살표
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: NHColors.gray400,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactActiveCard(TimeCapsule capsule) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-        if (capsule.type == CapsuleType.personal) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  PersonalCapsuleDiaryScreen(capsule: capsule),
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GroupCapsuleDiaryScreen(capsule: capsule),
-            ),
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: NHColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: NHColors.gray300),
-          boxShadow: [
-            BoxShadow(
-              color: NHColors.gray200.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // 아이콘
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: NHColors.gray100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  capsule.categoryIcon,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // 내용
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          capsule.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: NHColors.gray800,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: capsule.type == CapsuleType.personal
-                              ? NHColors.blue.withOpacity(0.1)
-                              : NHColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          capsule.type == CapsuleType.personal ? '개인형' : '모임형',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: capsule.type == CapsuleType.personal
-                                ? NHColors.blue
-                                : NHColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // 진행률 바
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: NHColors.gray200,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: capsule.progress.clamp(0.0, 1.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: capsule.type == CapsuleType.personal
-                                    ? NHColors.blue
-                                    : NHColors.primary,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${capsule.progressPercentage}%',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: NHColors.gray600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${capsule.daysLeft}일 남음',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: NHColors.gray500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 화살표
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: NHColors.gray400,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showPersonalCapsuleSelection({required String purpose}) {
@@ -1638,7 +1141,7 @@ class _NHHomeScreenState extends State<NHHomeScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('개인형 타임캡슐 없음'),
-          content: const Text('진행중인 개인형 타임캡슐이 없습니다.\n새 타임캡슐을 만들어보세요!'),
+          content: const Text('진행중인 개인형 타임캡슐이 없습니다.\n새 개인 타임캡슐을 만들어보세요!'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -1825,24 +1328,6 @@ class _NHHomeScreenState extends State<NHHomeScreen> {
     );
   }
 
-  void _navigateToCapsuleDiary(TimeCapsule capsule) {
-    if (capsule.type == CapsuleType.personal) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PersonalCapsuleDiaryScreen(capsule: capsule),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GroupCapsuleDiaryScreen(capsule: capsule),
-        ),
-      );
-    }
-  }
-
   Widget _buildFloatingActionButton() {
     return FloatingActionButton(
       onPressed: () async {
@@ -1858,6 +1343,450 @@ class _NHHomeScreenState extends State<NHHomeScreen> {
       },
       backgroundColor: NHColors.primary,
       child: const Icon(Icons.add, color: Colors.white, size: 28),
+    );
+  }
+}
+
+class _AllCapsulesDialog extends StatefulWidget {
+  final List<TimeCapsule> capsules;
+
+  const _AllCapsulesDialog({required this.capsules});
+
+  @override
+  _AllCapsulesDialogState createState() => _AllCapsulesDialogState();
+}
+
+class _AllCapsulesDialogState extends State<_AllCapsulesDialog> {
+  int selectedTab = 0; // 0: 열기 가능, 1: 진행중
+
+  @override
+  Widget build(BuildContext context) {
+    final openableCapsules =
+        widget.capsules.where((c) => c.isOpenable).toList();
+    final activeCapsules = widget.capsules
+        .where((c) => c.status == CapsuleStatus.active && !c.isAchieved)
+        .toList();
+
+    print('전체 캡슐 수: ${widget.capsules.length}');
+    print('열기 가능한 캡슐 수: ${openableCapsules.length}');
+    print('진행중인 캡슐 수: ${activeCapsules.length}');
+    print('진행중 캡슐들: ${activeCapsules.map((c) => c.title).toList()}');
+
+    return Dialog(
+      child: Container(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height * 0.95,
+        child: Column(
+          children: [
+            // 헤더
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: NHColors.white,
+                border: Border(bottom: BorderSide(color: NHColors.gray200)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '전체 타임캡슐',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: NHColors.gray800,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+
+            // 탭 버튼
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: NHColors.gray50,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          print('=== 열기 가능 탭 클릭됨 ===');
+                          setState(() {
+                            selectedTab = 0;
+                            print('selectedTab 변경됨: $selectedTab');
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: selectedTab == 0
+                                ? NHColors.primary
+                                : NHColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: selectedTab == 0
+                                  ? NHColors.primary
+                                  : NHColors.gray300,
+                            ),
+                          ),
+                          child: Text(
+                            '🎉 열기 가능 (${openableCapsules.length})',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: selectedTab == 0
+                                  ? Colors.white
+                                  : NHColors.gray600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          print('=== 진행중 탭 클릭됨 ===');
+                          print('현재 selectedTab: $selectedTab');
+                          setState(() {
+                            selectedTab = 1;
+                            print('selectedTab 변경됨: $selectedTab');
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: selectedTab == 1
+                                ? NHColors.primary
+                                : NHColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: selectedTab == 1
+                                  ? NHColors.primary
+                                  : NHColors.gray300,
+                            ),
+                          ),
+                          child: Text(
+                            '⏳ 진행중 (${activeCapsules.length})',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: selectedTab == 1
+                                  ? Colors.white
+                                  : NHColors.gray600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 컨텐츠
+            Expanded(
+              child: selectedTab == 0
+                  ? _buildOpenableCapsulesList(openableCapsules)
+                  : _buildActiveCapsulesList(activeCapsules),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOpenableCapsulesList(List<TimeCapsule> capsules) {
+    if (capsules.isEmpty) {
+      return _buildEmptyState(
+        '🎉',
+        '열기 가능한 타임캡슐이 없어요',
+        '목표를 달성한 타임캡슐이 여기에 표시됩니다',
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: capsules.length,
+      itemBuilder: (context, index) {
+        final capsule = capsules[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: _buildCompactOpenableCard(capsule),
+        );
+      },
+    );
+  }
+
+  Widget _buildActiveCapsulesList(List<TimeCapsule> capsules) {
+    if (capsules.isEmpty) {
+      return _buildEmptyState(
+        '⏳',
+        '진행중인 타임캡슐이 없어요',
+        '새로운 타임캡슐을 만들어보세요!',
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: capsules.length,
+      itemBuilder: (context, index) {
+        final capsule = capsules[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: _buildCompactActiveCard(capsule),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(String emoji, String title, String subtitle) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            emoji,
+            style: const TextStyle(fontSize: 48),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: NHColors.gray800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 14,
+              color: NHColors.gray600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactOpenableCard(TimeCapsule capsule) {
+    return GestureDetector(
+      onTap: () async {
+        Navigator.pop(context);
+        if (capsule.type == CapsuleType.personal) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PersonalCapsuleOpenScreen(capsule: capsule),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupCapsuleOpenScreen(capsule: capsule),
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: NHColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: NHColors.primary.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: NHColors.gray200.withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // 아이콘
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: NHColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  capsule.categoryIcon,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // 정보
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    capsule.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: NHColors.gray800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '목표 달성! 열어볼 수 있어요',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: NHColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 열기 버튼
+            const Icon(
+              Icons.lock_open,
+              color: NHColors.primary,
+              size: 24,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactActiveCard(TimeCapsule capsule) {
+    final progress = capsule.currentAmount / capsule.targetAmount;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context); // 다이얼로그 닫기
+
+        // 타임캡슐 타입에 따라 해당 금융일기 작성 화면으로 이동
+        if (capsule.type == CapsuleType.personal) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  PersonalCapsuleDiaryScreen(capsule: capsule),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupCapsuleDiaryScreen(capsule: capsule),
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: NHColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: NHColors.gray300),
+          boxShadow: [
+            BoxShadow(
+              color: NHColors.gray200.withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // 아이콘
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: NHColors.gray100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      capsule.categoryIcon,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // 정보
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        capsule.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: NHColors.gray800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${(progress * 100).toInt()}% 달성 - 일기 작성하기',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: NHColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 일기 작성 아이콘
+                const Icon(
+                  Icons.edit_note,
+                  color: NHColors.primary,
+                  size: 24,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 진행률 바
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: NHColors.gray200,
+              valueColor: AlwaysStoppedAnimation<Color>(NHColors.primary),
+              minHeight: 6,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

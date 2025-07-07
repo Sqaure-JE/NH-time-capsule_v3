@@ -16,6 +16,35 @@ class CapsuleContentScreen extends StatefulWidget {
 class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
   int selectedTabIndex = 0;
 
+  // 상호작용 데이터 관리
+  Map<int, Map<String, dynamic>> interactionData = {
+    0: {
+      'thumbsUp': 3,
+      'heart': 2,
+      'comments': ['정말 좋은 계획이네요! 기대됩니다.', '저도 참여하고 싶어요']
+    },
+    1: {
+      'thumbsUp': 2,
+      'heart': 4,
+      'comments': ['KTX 예약 성공! 👍', '빨리 가고 싶다']
+    },
+    2: {
+      'thumbsUp': 5,
+      'heart': 3,
+      'comments': ['바다뷰 최고!', '예약 잘했어요', '벌써 설렌다']
+    },
+    3: {
+      'thumbsUp': 1,
+      'heart': 2,
+      'comments': ['맛집 리스트 감사해요!']
+    },
+    4: {
+      'thumbsUp': 8,
+      'heart': 6,
+      'comments': ['축하해요! 🎉', '드디어 달성!', '부산여행 즐겨요', '대단해요']
+    },
+  };
+
   // 일기 데이터 (캡슐 타입에 따라 다름)
   List<Map<String, dynamic>> get diaryEntries {
     if (widget.capsule.type == CapsuleType.group) {
@@ -236,9 +265,8 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           children: [
             NHHeaderWidget(
               title: '타임캡슐 내용',
-              subtitle: widget.capsule.type == CapsuleType.personal
-                  ? '개인형'
-                  : '모임형',
+              subtitle:
+                  widget.capsule.type == CapsuleType.personal ? '개인형' : '모임형',
               showBackButton: true,
               showHomeButton: false,
               showNotificationButton: false,
@@ -494,6 +522,12 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
               ),
             ),
           ],
+
+          // 모임형 캡슐인 경우 상호작용 버튼 추가
+          if (widget.capsule.type == CapsuleType.group) ...[
+            const SizedBox(height: 12),
+            _buildInteractionButtons(diaryEntries.indexOf(entry)),
+          ],
         ],
       ),
     );
@@ -640,6 +674,207 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
                 style: const TextStyle(fontSize: 12, color: NHColors.gray500),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractionButtons(int entryIndex) {
+    final data = interactionData[entryIndex] ??
+        {'thumbsUp': 0, 'heart': 0, 'comments': <String>[]};
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: NHColors.gray50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _buildInteractionButton(
+            icon: Icons.thumb_up,
+            count: data['thumbsUp'],
+            onTap: () => _handleThumbsUp(entryIndex),
+            color: NHColors.blue,
+          ),
+          const SizedBox(width: 16),
+          _buildInteractionButton(
+            icon: Icons.favorite,
+            count: data['heart'],
+            onTap: () => _handleHeart(entryIndex),
+            color: NHColors.anger,
+          ),
+          const SizedBox(width: 16),
+          _buildInteractionButton(
+            icon: Icons.chat_bubble_outline,
+            count: (data['comments'] as List).length,
+            onTap: () => _handleComment(entryIndex),
+            color: NHColors.success,
+          ),
+          const Spacer(),
+          if ((data['comments'] as List).isNotEmpty)
+            TextButton(
+              onPressed: () => _showComments(entryIndex),
+              child: const Text(
+                '댓글 보기',
+                style: TextStyle(fontSize: 12, color: NHColors.primary),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractionButton({
+    required IconData icon,
+    required int count,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: color),
+            if (count > 0) ...[
+              const SizedBox(width: 4),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleThumbsUp(int entryIndex) {
+    setState(() {
+      interactionData[entryIndex] ??= {
+        'thumbsUp': 0,
+        'heart': 0,
+        'comments': <String>[]
+      };
+      interactionData[entryIndex]!['thumbsUp']++;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('👍 따봉을 눌렀습니다!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _handleHeart(int entryIndex) {
+    setState(() {
+      interactionData[entryIndex] ??= {
+        'thumbsUp': 0,
+        'heart': 0,
+        'comments': <String>[]
+      };
+      interactionData[entryIndex]!['heart']++;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('❤️ 하트를 눌렀습니다!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _handleComment(int entryIndex) {
+    final TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('💬 댓글 작성'),
+        content: TextField(
+          controller: commentController,
+          decoration: const InputDecoration(
+            hintText: '댓글을 입력하세요...',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (commentController.text.trim().isNotEmpty) {
+                setState(() {
+                  interactionData[entryIndex] ??= {
+                    'thumbsUp': 0,
+                    'heart': 0,
+                    'comments': <String>[]
+                  };
+                  (interactionData[entryIndex]!['comments'] as List<String>)
+                      .add(commentController.text.trim());
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('댓글이 작성되었습니다!'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              }
+            },
+            child: const Text('작성'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showComments(int entryIndex) {
+    final comments =
+        interactionData[entryIndex]?['comments'] as List<String>? ?? [];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('💬 댓글 목록'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: ListView.builder(
+            itemCount: comments.length,
+            itemBuilder: (context, index) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: NHColors.gray50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                comments[index],
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('닫기'),
           ),
         ],
       ),

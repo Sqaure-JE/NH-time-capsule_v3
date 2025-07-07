@@ -22,20 +22,21 @@ class _PersonalCapsuleDiaryScreenState
   String content = '';
   File? selectedImage;
   String milestone = '';
+  final TextEditingController _diaryController = TextEditingController();
 
   // 현재 캡슐 정보를 동적으로 가져오기
   Map<String, dynamic> get currentCapsule => {
-    'id': widget.capsule.id,
-    'title': widget.capsule.title,
-    'category': widget.capsule.category,
-    'currentAmount': widget.capsule.currentAmount,
-    'targetAmount': widget.capsule.targetAmount,
-    'progress': widget.capsule.progressPercentage,
-    'daysLeft': widget.capsule.daysLeft,
-    'startDate': widget.capsule.startDate.toString().substring(0, 10),
-    'endDate': widget.capsule.endDate.toString().substring(0, 10),
-    'recordCount': widget.capsule.recordCount,
-  };
+        'id': widget.capsule.id,
+        'title': widget.capsule.title,
+        'category': widget.capsule.category,
+        'currentAmount': widget.capsule.currentAmount,
+        'targetAmount': widget.capsule.targetAmount,
+        'progress': widget.capsule.progressPercentage,
+        'daysLeft': widget.capsule.daysLeft,
+        'startDate': widget.capsule.startDate.toString().substring(0, 10),
+        'endDate': widget.capsule.endDate.toString().substring(0, 10),
+        'recordCount': widget.capsule.recordCount,
+      };
 
   // 감정 캐릭터
   final List<Map<String, dynamic>> emotions = [
@@ -91,14 +92,11 @@ class _PersonalCapsuleDiaryScreenState
 
   int get basePoints => 50;
   int get imagePoints => selectedImage != null ? 20 : 0;
-  int get milestonePoints =>
-      milestones.firstWhere(
-            (m) => m['id'] == milestone,
-            orElse: () => {'bonus': 0},
-          )['bonus']
-          as int;
-  int get amountPoints =>
-      (amount.isNotEmpty &&
+  int get milestonePoints => milestones.firstWhere(
+        (m) => m['id'] == milestone,
+        orElse: () => {'bonus': 0},
+      )['bonus'] as int;
+  int get amountPoints => (amount.isNotEmpty &&
           int.tryParse(amount.replaceAll(',', '')) != null &&
           int.parse(amount.replaceAll(',', '')) > 0)
       ? 15
@@ -117,13 +115,11 @@ class _PersonalCapsuleDiaryScreenState
       (m) => m['id'] == milestone,
       orElse: () => {},
     );
-    final progressToTarget =
-        ((currentCapsule['currentAmount'] +
+    final progressToTarget = ((currentCapsule['currentAmount'] +
                 (int.tryParse(amount.replaceAll(',', '')) ?? 0)) /
             currentCapsule['targetAmount']) *
         100;
-    final remainingAmount =
-        currentCapsule['targetAmount'] -
+    final remainingAmount = currentCapsule['targetAmount'] -
         currentCapsule['currentAmount'] -
         (int.tryParse(amount.replaceAll(',', '')) ?? 0);
     final avgPerDay = currentCapsule['daysLeft'] > 0
@@ -574,10 +570,20 @@ class _PersonalCapsuleDiaryScreenState
                   color: NHColors.gray800,
                 ),
               ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () => _generateAIContent(selectedEmotionData),
+                icon: const Icon(Icons.auto_awesome, color: NHColors.primary),
+                label: const Text(
+                  'AI 글쓰기 추천',
+                  style: TextStyle(color: NHColors.primary, fontSize: 12),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           TextField(
+            controller: _diaryController,
             onChanged: (value) {
               setState(() {
                 content = value;
@@ -921,8 +927,92 @@ class _PersonalCapsuleDiaryScreenState
     final number = int.tryParse(value.toString());
     if (number == null) return value.toString();
     return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
+  }
+
+  void _generateAIContent(Map selectedEmotionData) {
+    String aiContent = '';
+
+    if (selectedEmotion.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('감정을 먼저 선택해주세요!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // 현재 진행 상황 정보
+    final currentAmount = currentCapsule['currentAmount'];
+    final targetAmount = currentCapsule['targetAmount'];
+    final progressPercentage = (currentAmount / targetAmount * 100).round();
+    final emotionName = selectedEmotionData['name'];
+    final inputAmount = int.tryParse(amount.replaceAll(',', '')) ?? 0;
+
+    // 이정표별 AI 추천
+    if (milestone == 'saving') {
+      if (progressPercentage >= 80) {
+        aiContent =
+            '와! ${emotionName}가 저축하며 신나서 어쩔 줄 모르고 있어요! 💰 "벌써 ${progressPercentage}%나 모았다고?!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더 모았어!' : ''} 목표 달성이 코앞이네요!';
+      } else if (progressPercentage >= 50) {
+        aiContent =
+            '${emotionName}가 꾸준히 저축하며 뿌듯해하고 있어요! 📈 "벌써 절반 이상 달성!" ${inputAmount > 0 ? '오늘도 ${_formatNumber(inputAmount)}원 저축했어요.' : ''} 이 속도라면 목표 달성은 시간문제예요!';
+      } else {
+        aiContent =
+            '${emotionName}가 저축을 시작하며 희망차게 말해요! ✨ "목표를 향해 첫 걸음!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원 저축했어요.' : ''} 작은 시작이지만 큰 꿈을 향해 나아가고 있어요!';
+      }
+    } else if (milestone == 'sacrifice') {
+      if (selectedEmotion == 'joy') {
+        aiContent =
+            '${emotionName}가 뿌듯하게 말해요! 😊 "참는 것도 이제 습관이 됐어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 아껴서' : ''} 목표에 한 걸음 더 가까워졌어요. 이런 작은 절약이 모여 큰 성과를 만들어요!';
+      } else if (selectedEmotion == 'sadness') {
+        aiContent =
+            '${emotionName}가 아쉬워하면서도 말해요... 😢 "참기 힘들지만 목표를 위해서!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 아꼈지만' : ''} 때로는 포기하는 것도 용기가 필요해요. 조금만 더 힘내요!';
+      } else {
+        aiContent =
+            '${emotionName}가 의지를 다지며 말해요! 💪 "목표를 위해 참을 수 있어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 절약했어요.' : ''} 이런 결단력이 성공의 열쇠예요!';
+      }
+    } else if (milestone == 'progress') {
+      if (progressPercentage >= 90) {
+        aiContent =
+            '${emotionName}가 감격스럽게 외쳐요! 🎉 "드디어! 목표가 눈앞에!" 90%를 넘어선 지금, ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더해서' : ''} 성공의 달콤함을 미리 맛보고 있어요!';
+      } else if (progressPercentage >= 70) {
+        aiContent =
+            '${emotionName}가 자신감 넘치게 말해요! 🚀 "70% 돌파! 이제 진짜 보여!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원 추가로' : ''} 목표 달성이 현실이 되고 있어요!';
+      } else {
+        aiContent =
+            '${emotionName}가 차근차근 말해요! 📊 "꾸준히 진행 중이야!" ${progressPercentage}% 달성했고, ${inputAmount > 0 ? '오늘도 ${_formatNumber(inputAmount)}원을 보탰어요.' : ''} 매일매일이 소중한 진전이에요!';
+      }
+    } else if (milestone == 'challenge') {
+      aiContent =
+          '${emotionName}가 당당하게 말해요! 💪 "어려움도 이겨냈어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 모으는 것이 쉽지 않았지만' : ''} 포기하지 않고 계속 도전한 자신이 정말 대단해요!';
+    } else {
+      // 기본 감정별 메시지
+      if (selectedEmotion == 'joy') {
+        aiContent =
+            '${emotionName}가 기쁘게 말해요! 😊 "목표를 향해 한 걸음씩!" ${progressPercentage}% 달성한 지금, ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더했어요!' : ''} 이런 기쁨이 계속되길 바라요!';
+      } else if (selectedEmotion == 'fear') {
+        aiContent =
+            '${emotionName}가 조심스럽게 말해요... 😰 "목표 달성할 수 있을까?" ${progressPercentage}% 진행했지만 ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 추가했어요.' : ''} 불안하더라도 계속 나아가는 것이 중요해요!';
+      } else {
+        aiContent =
+            '${emotionName}와 함께 목표를 향해 나아가고 있어요! ✨ ${progressPercentage}% 달성한 지금, ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더했어요!' : ''} 꾸준한 노력이 성공의 비결이에요!';
+      }
+    }
+
+    setState(() {
+      content = aiContent;
+      _diaryController.text = aiContent;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('AI가 타임캡슐 스토리를 생성했습니다! ✨'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 }

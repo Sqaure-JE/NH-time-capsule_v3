@@ -26,10 +26,12 @@ class _CapsuleCharacterAnalysisScreenState
         return _getAnniversaryAnalysisData();
       case 'capsule_4': // 제주도 여행 자금 (완료)
         return _getJejuAnalysisData();
+      case 'capsule_7': // 결혼기념일
+        return _getAnniversaryAnalysisData();
       case 'capsule_9': // 부산 여행 자금 (완료)
         return _getBusanAnalysisData();
       default:
-        return _getJejuAnalysisData(); // 기본값
+        return _getNewCapsuleAnalysisData(); // 새로운 타임캡슐 기본값
     }
   }
 
@@ -198,11 +200,51 @@ class _CapsuleCharacterAnalysisScreenState
       ],
       'monthlyEmotionChanges': [
         {
-          'month': '최근 6개월',
+          'month': '1월',
           'joy': 15,
+          'fear': 60,
+          'sadness': 15,
+          'anger': 5,
+          'disgust': 5,
+        },
+        {
+          'month': '2월',
+          'joy': 20,
+          'fear': 55,
+          'sadness': 15,
+          'anger': 5,
+          'disgust': 5,
+        },
+        {
+          'month': '3월',
+          'joy': 25,
+          'fear': 50,
+          'sadness': 15,
+          'anger': 5,
+          'disgust': 5,
+        },
+        {
+          'month': '4월',
+          'joy': 30,
+          'fear': 45,
+          'sadness': 15,
+          'anger': 5,
+          'disgust': 5,
+        },
+        {
+          'month': '5월',
+          'joy': 35,
+          'fear': 40,
+          'sadness': 15,
+          'anger': 5,
+          'disgust': 5,
+        },
+        {
+          'month': '6월',
+          'joy': 40,
           'fear': 35,
-          'sadness': 20,
-          'anger': 25,
+          'sadness': 15,
+          'anger': 5,
           'disgust': 5,
         },
       ],
@@ -244,10 +286,10 @@ class _CapsuleCharacterAnalysisScreenState
   // 결혼기념일 자금 분석 데이터
   Map<String, dynamic> _getAnniversaryAnalysisData() {
     return {
-      'capsuleTitle': '💒 결혼기념일 자금',
+      'capsuleTitle': '💕 결혼기념일',
       'period': '3개월',
-      'startDate': '2025.08.01',
-      'endDate': '2025.01.06',
+      'startDate': '2024.10.01',
+      'endDate': '2024.12.31',
       'totalDiaries': 18,
       'totalPoints': 520,
       'mainCharacter': {
@@ -286,7 +328,7 @@ class _CapsuleCharacterAnalysisScreenState
       ],
       'monthlyEmotionChanges': [
         {
-          'month': '8월',
+          'month': '10월',
           'joy': 70,
           'fear': 15,
           'sadness': 8,
@@ -294,7 +336,7 @@ class _CapsuleCharacterAnalysisScreenState
           'disgust': 3,
         },
         {
-          'month': '9월',
+          'month': '11월',
           'joy': 80,
           'fear': 10,
           'sadness': 6,
@@ -302,7 +344,7 @@ class _CapsuleCharacterAnalysisScreenState
           'disgust': 2,
         },
         {
-          'month': '10월',
+          'month': '12월',
           'joy': 85,
           'fear': 8,
           'sadness': 4,
@@ -1335,6 +1377,64 @@ class _CapsuleCharacterAnalysisScreenState
         ],
       ),
     );
+  }
+
+  // 새로운 타임캡슐 분석 데이터
+  Map<String, dynamic> _getNewCapsuleAnalysisData() {
+    return {
+      'capsuleTitle': '✨ 새로운 타임캡슐',
+      'period': '1개월',
+      'startDate': '2024.09.23',
+      'endDate': '2024.10.23',
+      'totalDiaries': 1,
+      'totalPoints': 30,
+      'mainCharacter': {
+        'emoji': '😊',
+        'name': '기쁨이',
+        'level': 1,
+        'percentage': 80,
+        'growth': '+0레벨',
+        'color': NHColors.joy,
+      },
+      'emotionJourney': [
+        {
+          'phase': '시작',
+          'period': '1주일',
+          'mainEmotion': '😊',
+          'description': '새로운 저축 습관 형성의 기쁨',
+          'percentage': 80,
+          'color': NHColors.joy,
+        },
+      ],
+      'monthlyEmotionChanges': [
+        {
+          'month': '9월',
+          'joy': 80,
+          'fear': 10,
+          'sadness': 5,
+          'anger': 3,
+          'disgust': 2,
+        },
+      ],
+      'successPatterns': [
+        {'pattern': '기본 저축', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '습관 형성', 'frequency': '주 3회', 'effectiveness': '중간'},
+      ],
+      'recommendations': [
+        {
+          'type': '적금상품',
+          'name': 'NH기본 적금',
+          'reason': '안정적인 저축 습관 형성',
+          'rate': '3.0%',
+        },
+      ],
+      'achievements': [
+        {'icon': '🎯', 'title': '시작', 'desc': '80% 달성'},
+        {'icon': '📈', 'title': '성장', 'desc': '기쁨이 Lv.1'},
+        {'icon': '📅', 'title': '기록', 'desc': '1일 기록'},
+        {'icon': '💰', 'title': '저축', 'desc': '기본 습관'},
+      ],
+    };
   }
 
   void _handleDownload() {

@@ -171,6 +171,39 @@ class _MonthlyCharacterAnalysisScreenState
         'icon': '🌅',
       },
     ],
+    // 일자별 감정 데이터 추가
+    'dailyEmotions': [
+      {'date': '9/1', 'emotion': '😊', 'description': '월급날! 저축 목표 달성 기쁨'},
+      {'date': '9/2', 'emotion': '😊', 'description': '카페 대신 집에서 커피 마시며 절약'},
+      {'date': '9/3', 'emotion': '😰', 'description': '예상치 못한 교통비 지출'},
+      {'date': '9/4', 'emotion': '😊', 'description': '부업 수입 첫 달성'},
+      {'date': '9/5', 'emotion': '😢', 'description': '충동구매 후 후회'},
+      {'date': '9/6', 'emotion': '😊', 'description': '목표 저축액 달성'},
+      {'date': '9/7', 'emotion': '😡', 'description': '불필요한 수수료 지출'},
+      {'date': '9/8', 'emotion': '😊', 'description': '친구와 공동구매로 절약'},
+      {'date': '9/9', 'emotion': '😰', 'description': '병원비 지출로 예산 초과'},
+      {'date': '9/10', 'emotion': '🤢', 'description': '과도한 마케팅에 속아 구매'},
+      {'date': '9/11', 'emotion': '😊', 'description': '투자 수익 첫 달성'},
+      {'date': '9/12', 'emotion': '😢', 'description': '목표 달성 실패'},
+      {'date': '9/13', 'emotion': '😰', 'description': '급여 지연으로 불안'},
+      {'date': '9/14', 'emotion': '😊', 'description': '절약 습관 형성 기쁨'},
+      {'date': '9/15', 'emotion': '😡', 'description': '가격 인상에 대한 분노'},
+      {'date': '9/16', 'emotion': '😊', 'description': '문화생활비 절약 성공'},
+      {'date': '9/17', 'emotion': '😊', 'description': '저축 목표 50% 달성'},
+      {'date': '9/18', 'emotion': '😰', 'description': '예상치 못한 수리비'},
+      {'date': '9/19', 'emotion': '😊', 'description': '투자 상품 수익률 상승'},
+      {'date': '9/20', 'emotion': '😡', 'description': '부당한 요금 청구'},
+      {'date': '9/21', 'emotion': '😰', 'description': '경제 불안으로 인한 걱정'},
+      {'date': '9/22', 'emotion': '😊', 'description': '가족과 함께하는 저렴한 외식'},
+      {'date': '9/23', 'emotion': '😢', 'description': '목표 달성 실패로 인한 슬픔'},
+      {'date': '9/24', 'emotion': '😊', 'description': '새로운 절약 방법 발견'},
+      {'date': '9/25', 'emotion': '😰', 'description': '급여 삭감 소식'},
+      {'date': '9/26', 'emotion': '😊', 'description': '저축 목표 80% 달성'},
+      {'date': '9/27', 'emotion': '🤢', 'description': '불합리한 상품 구매'},
+      {'date': '9/28', 'emotion': '😰', 'description': '예산 초과 위기'},
+      {'date': '9/29', 'emotion': '😡', 'description': '서비스 품질 저하'},
+      {'date': '9/30', 'emotion': '😊', 'description': '월말 저축 목표 달성!'},
+    ],
     'nextMonthGoals': [
       {'goal': '저축 목표', 'target': '600,000원', 'current': '500,000원'},
       {'goal': '기쁨이 레벨업', 'target': 'Lv.8', 'current': 'Lv.7'},
@@ -203,6 +236,8 @@ class _MonthlyCharacterAnalysisScreenState
                     _buildMainCharacter(),
                     const SizedBox(height: 20),
                     _buildCharacterGrowth(),
+                    const SizedBox(height: 20),
+                    _buildDailyEmotionCalendar(),
                     const SizedBox(height: 20),
                     _buildMonthlyHighlights(),
                     const SizedBox(height: 20),
@@ -1284,6 +1319,194 @@ class _MonthlyCharacterAnalysisScreenState
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDailyEmotionCalendar() {
+    final dailyEmotions = analysisData['dailyEmotions'] as List<dynamic>;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: NHColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: NHColors.gray200.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '📅 일자별 감정 여정',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: NHColors.gray800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '매일 어떤 감정들이 있었는지 한눈에 확인해보세요',
+            style: TextStyle(
+              fontSize: 14,
+              color: NHColors.gray600,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 감정 그리드
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 3,
+              mainAxisSpacing: 3,
+            ),
+            itemCount: dailyEmotions.length,
+            itemBuilder: (context, index) {
+              final emotion = dailyEmotions[index];
+              return _buildEmotionDay(emotion);
+            },
+          ),
+
+          const SizedBox(height: 16),
+
+          // 감정 범례
+          _buildEmotionLegend(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmotionDay(Map<String, dynamic> emotion) {
+    return GestureDetector(
+      onTap: () => _showEmotionDetail(emotion),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _getEmotionColor(emotion['emotion']).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: _getEmotionColor(emotion['emotion']).withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              emotion['date'].split('/')[1], // 날짜만 추출
+              style: const TextStyle(
+                fontSize: 7,
+                fontWeight: FontWeight.w500,
+                color: NHColors.gray800,
+              ),
+            ),
+            const SizedBox(height: 1),
+            Text(
+              emotion['emotion'],
+              style: const TextStyle(fontSize: 11),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getEmotionColor(String emotion) {
+    switch (emotion) {
+      case '😊':
+        return NHColors.joy;
+      case '😰':
+        return NHColors.fear;
+      case '😢':
+        return NHColors.sadness;
+      case '😡':
+        return NHColors.anger;
+      case '🤢':
+        return NHColors.disgust;
+      default:
+        return NHColors.gray400;
+    }
+  }
+
+  void _showEmotionDetail(Map<String, dynamic> emotion) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Text(emotion['emotion'], style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 8),
+            Text(emotion['date']),
+          ],
+        ),
+        content: Text(emotion['description']),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmotionLegend() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: NHColors.gray50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '감정 범례',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: NHColors.gray700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              _buildLegendItem('😊', '기쁨이'),
+              _buildLegendItem('😰', '불안이'),
+              _buildLegendItem('😢', '슬픔이'),
+              _buildLegendItem('😡', '분노'),
+              _buildLegendItem('🤢', '까칠이'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String emoji, String name) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 12)),
+        const SizedBox(width: 4),
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 10,
+            color: NHColors.gray600,
+          ),
+        ),
+      ],
     );
   }
 

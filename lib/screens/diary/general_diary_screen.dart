@@ -21,6 +21,7 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
   String category = '';
   String content = '';
   File? selectedImage;
+  final TextEditingController contentController = TextEditingController();
 
   // 샘플 자동 연동 내역
   final List<Map<String, String>> todayTransactions = [
@@ -74,9 +75,8 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
       (e) => e['id'] == selectedEmotion,
       orElse: () => {},
     );
-    final currentCategories = transactionType == 'expense'
-        ? expenseCategories
-        : incomeCategories;
+    final currentCategories =
+        transactionType == 'expense' ? expenseCategories : incomeCategories;
 
     return Scaffold(
       backgroundColor: NHColors.background,
@@ -594,20 +594,28 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
                   color: NHColors.gray800,
                 ),
               ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: _generateAIContent,
+                icon: const Icon(Icons.auto_awesome, color: NHColors.primary),
+                label: const Text(
+                  'AI 글쓰기 추천',
+                  style: TextStyle(color: NHColors.primary, fontSize: 12),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           TextField(
+            controller: contentController,
             onChanged: (value) {
               setState(() {
                 content = value;
               });
             },
             maxLines: 4,
-            decoration: InputDecoration(
-              hintText: selectedEmotionData.isNotEmpty
-                  ? '${selectedEmotionData['name']}와 함께 오늘의 돈 관리에 대한 솔직한 생각을 적어보세요...'
-                  : '오늘의 소비, 수입, 저축에 대한 생각을 자유롭게 적어보세요...',
+            decoration: const InputDecoration(
+              hintText: '오늘의 소비, 수입, 저축에 대한 생각을 자유롭게 적어보세요...',
             ),
           ),
           const SizedBox(height: 8),
@@ -799,22 +807,17 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
       (e) => e['id'] == selectedEmotion,
       orElse: () => {},
     );
+    final currentContext = context;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('💾 금융일기 저장 완료!'),
         content: Text('${selectedEmotionData['name']}와 함께 $points P 적립!'),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Future.delayed(Duration(milliseconds: 200), () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const GeneralDiaryListScreen(),
-                  ),
-                );
-              });
+              Navigator.of(dialogContext).pop();
+              Navigator.of(currentContext).popUntil((route) => route.isFirst);
             },
             child: const Text('확인'),
           ),
@@ -838,9 +841,9 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
     final number = int.tryParse(value);
     if (number == null) return value;
     return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 
   void _showMonthlyDiaries() {
@@ -1014,18 +1017,18 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
+                                                horizontal: 8,
+                                                vertical: 2,
+                                              ),
                                               decoration: BoxDecoration(
-                                                color:
-                                                    (diary['type'] as String) ==
+                                                color: (diary['type']
+                                                            as String) ==
                                                         'income'
                                                     ? NHColors.blue.withOpacity(
                                                         0.1,
                                                       )
                                                     : NHColors.anger
-                                                          .withOpacity(0.1),
+                                                        .withOpacity(0.1),
                                                 borderRadius:
                                                     BorderRadius.circular(4),
                                               ),
@@ -1034,8 +1037,7 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w500,
-                                                  color:
-                                                      (diary['type']
+                                                  color: (diary['type']
                                                               as String) ==
                                                           'income'
                                                       ? NHColors.blue
@@ -1089,5 +1091,104 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
         ),
       ),
     );
+  }
+
+  void _generateAIContent() {
+    // 감정 + 거래유형 + 카테고리 + 금액 기반 AI 글쓰기 추천
+    String aiContent = '';
+
+    if (selectedEmotion.isEmpty || amount.isEmpty || category.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('감정, 금액, 카테고리를 먼저 선택해주세요!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final emotionName = emotions.firstWhere(
+      (e) => e['id'] == selectedEmotion,
+      orElse: () => {'name': ''},
+    )['name'];
+
+    final categoryName =
+        (transactionType == 'expense' ? expenseCategories : incomeCategories)
+            .firstWhere(
+      (c) => c['id'] == category,
+      orElse: () => {'name': ''},
+    )['name'];
+
+    final amountNum = int.tryParse(amount.replaceAll(',', '')) ?? 0;
+
+    // 감정별 차별화된 톤앤매너로 AI 글쓰기 추천
+    switch (selectedEmotion) {
+      case 'joy':
+        if (transactionType == 'income') {
+          aiContent =
+              '와! ${categoryName}이 들어와서 정말 기뻐요! ${amountNum >= 1000000 ? '이번 달 목표 달성에 한 걸음 더 가까워졌어요' : '작은 수입이지만 뿌듯해요'} 💪';
+        } else {
+          aiContent =
+              '${categoryName}에 ${_formatNumber(amountNum)}원 썼는데, 이번엔 정말 만족스러워요! ${amountNum >= 50000 ? '비싸긴 하지만' : '적당한 금액으로'} 기분전환이 잘 됐어요 😊';
+        }
+        break;
+      case 'sadness':
+        if (transactionType == 'income') {
+          aiContent =
+              '${categoryName}이 들어왔지만... 예상보다 적어서 조금 슬퍼요. ${amountNum >= 1000000 ? '더 열심히 일해야겠어요' : '다음엔 더 많이 벌 수 있을까요?'} 😢';
+        } else {
+          aiContent =
+              '${categoryName}에 ${_formatNumber(amountNum)}원 썼는데 후회가 들어요. ${amountNum >= 50000 ? '너무 많이 쓴 것 같아요' : '다음엔 더 신중하게 결정해야겠어요'}. 절약해야겠어요 💔';
+        }
+        break;
+      case 'anger':
+        if (transactionType == 'income') {
+          aiContent =
+              '${categoryName}이 들어왔지만 세금과 공제가 너무 많아서 화가 나요! ${amountNum >= 1000000 ? '이렇게 열심히 일했는데' : '정말 억울해요'}. 더 나은 조건을 찾아봐야겠어요 😡';
+        } else {
+          aiContent =
+              '${categoryName}에 ${_formatNumber(amountNum)}원? 너무 비싸요! ${amountNum >= 50000 ? '이런 가격은 말이 안 돼요' : '정말 부당해요'}. 다음엔 다른 곳을 찾아봐야겠어요 😤';
+        }
+        break;
+      case 'fear':
+        if (transactionType == 'income') {
+          aiContent =
+              '${categoryName}이 들어왔지만... ${amountNum >= 1000000 ? '이런 수입이 계속될까요?' : '불안해요'}. 미래가 걱정돼요. 더 안정적인 수입원을 찾아봐야겠어요 😰';
+        } else {
+          aiContent =
+              '${categoryName}에 ${_formatNumber(amountNum)}원 썼는데... ${amountNum >= 50000 ? '이렇게 계속 쓰면 어떡하죠?' : '예산을 초과할까봐 걱정이에요'}. 절약해야겠어요 😨';
+        }
+        break;
+      case 'disgust':
+        if (transactionType == 'income') {
+          aiContent =
+              '${categoryName}이 들어왔지만... ${amountNum >= 1000000 ? '이런 시스템이 정말 싫어요' : '정말 불합리해요'}. 더 나은 방법이 있을 텐데요 🤢';
+        } else {
+          aiContent =
+              '${categoryName}에 ${_formatNumber(amountNum)}원? ${amountNum >= 50000 ? '이런 가격은 정말 말이 안 돼요' : '정말 싫어요'}. 더 합리적인 선택을 해야겠어요 🤮';
+        }
+        break;
+    }
+
+    // AI 추천 내용을 텍스트 필드에 입력
+    contentController.text = aiContent;
+    setState(() {
+      content = aiContent;
+    });
+
+    // 스낵바로 생성 완료 알림
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('AI가 맞춤형 글을 생성했습니다! ✨'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _formatNumber(int number) {
+    return number.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 }

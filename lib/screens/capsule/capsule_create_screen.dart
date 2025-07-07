@@ -30,8 +30,8 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
   String customCategory = '';
 
   // 멤버 선택 관련
-  final List<String> allMembers = ['김올리', '박수빈', '이정은'];
-  List<String> selectedMembers = [];
+  final List<String> allMembers = ['박수빈', '이정은', '최민수'];
+  List<String> selectedMembers = ['김올리']; // 김올리는 기본으로 포함
 
   // 유효성 검사
   bool get isStep1Valid =>

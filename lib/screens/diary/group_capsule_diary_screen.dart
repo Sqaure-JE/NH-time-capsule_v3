@@ -23,23 +23,84 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
   File? selectedReceipt;
   String splitMethod = 'equal';
   List<String> selectedMembers = [];
+  String diaryContent = '';
+  final TextEditingController _diaryController = TextEditingController();
+
+  // 상호작용 데이터 (실제로는 서버에서 가져와야 함)
+  final List<Map<String, dynamic>> diaryEntries = [
+    {
+      'id': '1',
+      'member': '김올리',
+      'avatar': '👤',
+      'date': '2024-12-15',
+      'type': 'contribution',
+      'amount': 50000,
+      'description': '이번 달 정기 적립 완료! 목표 달성까지 화이팅! 💪',
+      'category': '정기 적립',
+      'likes': 3,
+      'isLiked': true,
+      'hearts': 2,
+      'isHearted': false,
+      'comments': [
+        {'member': '박수빈', 'content': '고생했어요! 👍', 'date': '2024-12-15'},
+        {'member': '이정은', 'content': '다음 달도 파이팅!', 'date': '2024-12-15'},
+      ],
+    },
+    {
+      'id': '2',
+      'member': '박수빈',
+      'avatar': '👩',
+      'date': '2024-12-14',
+      'type': 'expense',
+      'amount': -150000,
+      'description': '숙소 예약금 지불했습니다. 호텔 위치가 정말 좋아요! 🏨',
+      'category': '예약금',
+      'likes': 5,
+      'isLiked': false,
+      'hearts': 4,
+      'isHearted': true,
+      'comments': [
+        {'member': '김올리', 'content': '와! 정말 좋은 위치네요!', 'date': '2024-12-14'},
+        {'member': '최민수', 'content': '기대되네요 😊', 'date': '2024-12-14'},
+      ],
+    },
+    {
+      'id': '3',
+      'member': '이정은',
+      'avatar': '👨',
+      'date': '2024-12-13',
+      'type': 'contribution',
+      'amount': 75000,
+      'description': '보너스로 추가 적립했어요! 목표에 한 걸음 더 가까워졌네요 🎯',
+      'category': '보너스 추가',
+      'likes': 7,
+      'isLiked': true,
+      'hearts': 6,
+      'isHearted': true,
+      'comments': [
+        {'member': '김올리', 'content': '축하해요! 🎉', 'date': '2024-12-13'},
+        {'member': '박수빈', 'content': '정말 대단해요!', 'date': '2024-12-13'},
+        {'member': '최민수', 'content': '저도 보너스 받으면 추가할게요!', 'date': '2024-12-13'},
+      ],
+    },
+  ];
 
   // 현재 캡슐 정보를 동적으로 가져오기
   Map<String, dynamic> get currentGroupCapsule => {
-    'id': widget.capsule.id,
-    'title': widget.capsule.title,
-    'category': widget.capsule.category,
-    'totalTarget': widget.capsule.targetAmount,
-    'currentTotal': widget.capsule.currentAmount,
-    'progress': widget.capsule.progressPercentage,
-    'daysLeft': widget.capsule.daysLeft,
-    'memberCount': widget.capsule.memberIds.length,
-    'myContribution':
-        (widget.capsule.currentAmount / widget.capsule.memberIds.length)
-            .round(),
-    'startDate': widget.capsule.startDate.toString().substring(0, 10),
-    'endDate': widget.capsule.endDate.toString().substring(0, 10),
-  };
+        'id': widget.capsule.id,
+        'title': widget.capsule.title,
+        'category': widget.capsule.category,
+        'totalTarget': widget.capsule.targetAmount,
+        'currentTotal': widget.capsule.currentAmount,
+        'progress': widget.capsule.progressPercentage,
+        'daysLeft': widget.capsule.daysLeft,
+        'memberCount': widget.capsule.memberIds.length,
+        'myContribution':
+            (widget.capsule.currentAmount / widget.capsule.memberIds.length)
+                .round(),
+        'startDate': widget.capsule.startDate.toString().substring(0, 10),
+        'endDate': widget.capsule.endDate.toString().substring(0, 10),
+      };
   List<Map<String, dynamic>> get members {
     final memberContribution =
         (widget.capsule.currentAmount / widget.capsule.memberIds.length)
@@ -139,7 +200,11 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
                     const SizedBox(height: 16),
                     _buildReceiptInput(),
                     const SizedBox(height: 16),
+                    _buildDiaryContentInput(),
+                    const SizedBox(height: 16),
                     _buildPointInfo(),
+                    const SizedBox(height: 16),
+                    _buildDiaryList(),
                   ],
                 ),
               ),
@@ -791,9 +856,8 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
               onPressed: amount.isNotEmpty ? _saveDiary : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: amount.isNotEmpty
-                    ? NHColors.blue
-                    : NHColors.gray300,
+                backgroundColor:
+                    amount.isNotEmpty ? NHColors.blue : NHColors.gray300,
               ),
               child: const Text(
                 '모임 기록 저장 💬',
@@ -835,13 +899,396 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
     }
   }
 
+  Widget _buildDiaryList() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: NHColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: NHColors.gray200.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '📝 모임 기록',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: NHColors.gray800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...diaryEntries.map((entry) => _buildDiaryEntry(entry)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiaryEntry(Map<String, dynamic> entry) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: NHColors.gray50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: NHColors.gray200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더
+          Row(
+            children: [
+              Text(entry['avatar'], style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry['member'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    entry['date'],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: NHColors.gray500,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: entry['type'] == 'contribution'
+                      ? NHColors.blue.withOpacity(0.1)
+                      : NHColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  entry['category'],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: entry['type'] == 'contribution'
+                        ? NHColors.blue
+                        : NHColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // 금액
+          Text(
+            '${entry['amount'] > 0 ? '+' : ''}${_formatNumber(entry['amount'])}원',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: entry['amount'] > 0 ? NHColors.blue : NHColors.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // 설명
+          Text(
+            entry['description'],
+            style: const TextStyle(fontSize: 14, color: NHColors.gray700),
+          ),
+          const SizedBox(height: 12),
+
+          // 상호작용 버튼
+          Row(
+            children: [
+              _buildInteractionButton(
+                icon:
+                    entry['isLiked'] ? Icons.thumb_up : Icons.thumb_up_outlined,
+                count: entry['likes'],
+                isActive: entry['isLiked'],
+                onTap: () => _handleThumbsUp(entry['id']),
+              ),
+              const SizedBox(width: 16),
+              _buildInteractionButton(
+                icon:
+                    entry['isHearted'] ? Icons.favorite : Icons.favorite_border,
+                count: entry['hearts'],
+                isActive: entry['isHearted'],
+                onTap: () => _handleHeart(entry['id']),
+              ),
+              const SizedBox(width: 16),
+              _buildInteractionButton(
+                icon: Icons.comment_outlined,
+                count: entry['comments'].length,
+                isActive: false,
+                onTap: () => _handleComment(entry),
+              ),
+            ],
+          ),
+
+          // 댓글 목록
+          if (entry['comments'].isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: NHColors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: entry['comments']
+                    .map<Widget>(
+                      (comment) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${comment['member']}: ',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                comment['content'],
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractionButton({
+    required IconData icon,
+    required int count,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isActive ? NHColors.primary : NHColors.gray500,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            count.toString(),
+            style: TextStyle(
+              fontSize: 12,
+              color: isActive ? NHColors.primary : NHColors.gray500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleThumbsUp(String entryId) {
+    setState(() {
+      final entry = diaryEntries.firstWhere((e) => e['id'] == entryId);
+      if (entry['isLiked']) {
+        entry['likes']--;
+        entry['isLiked'] = false;
+      } else {
+        entry['likes']++;
+        entry['isLiked'] = true;
+      }
+    });
+  }
+
+  void _handleHeart(String entryId) {
+    setState(() {
+      final entry = diaryEntries.firstWhere((e) => e['id'] == entryId);
+      if (entry['isHearted']) {
+        entry['hearts']--;
+        entry['isHearted'] = false;
+      } else {
+        entry['hearts']++;
+        entry['isHearted'] = true;
+      }
+    });
+  }
+
+  void _handleComment(Map<String, dynamic> entry) {
+    final TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('💬 댓글 작성'),
+        content: TextField(
+          controller: commentController,
+          decoration: const InputDecoration(
+            hintText: '댓글을 입력하세요...',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (commentController.text.isNotEmpty) {
+                setState(() {
+                  entry['comments'].add({
+                    'member': '김올리',
+                    'content': commentController.text,
+                    'date': DateTime.now().toString().substring(0, 10),
+                  });
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('작성'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiaryContentInput() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: NHColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: NHColors.gray200.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                '📝 한 줄 기록',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: NHColors.gray800,
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: _generateAIContent,
+                icon: const Icon(Icons.auto_awesome, color: NHColors.primary),
+                label: const Text(
+                  'AI 글쓰기 추천',
+                  style: TextStyle(color: NHColors.primary, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _diaryController,
+            onChanged: (value) => setState(() => diaryContent = value),
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: '모임원들과 공유할 오늘의 기록을 남겨보세요...',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '💡 예시: "숙소 예약 완료! 위치가 정말 좋네요 🏨", "이번 달 목표 달성! 다들 고생했어요 💪"',
+            style: TextStyle(fontSize: 12, color: NHColors.gray500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _generateAIContent() {
+    String aiContent = '';
+    final inputAmount = int.tryParse(amount.replaceAll(',', '')) ?? 0;
+
+    if (transactionType == 'contribution') {
+      if (inputAmount >= 1000000) {
+        aiContent =
+            '와! 정말 대박 기여에요! 💰 "이번에 ${_formatNumber(inputAmount)}원이나 넣었다고?!" 팀원들이 깜짝 놀라면서 감동받을 것 같아요. 목표 달성이 훨씬 빨라질 것 같아요! 🚀';
+      } else if (inputAmount >= 500000) {
+        aiContent =
+            '엄청난 기여네요! 💪 "${_formatNumber(inputAmount)}원! 진짜 대단하다!" 팀원들이 환호성을 지를 것 같아요. 이런 적극적인 자세가 모임을 성공으로 이끄는 원동력이에요! 👏';
+      } else if (inputAmount >= 100000) {
+        aiContent =
+            '꾸준한 기여 감사해요! 😊 "${_formatNumber(inputAmount)}원 추가했어요!" 작은 금액이라도 모이면 큰 힘이 되죠. 이런 성실함이 모임의 성공 비결이에요! ✨';
+      } else {
+        aiContent =
+            '조금씩이라도 함께해주셔서 고마워요! 💝 "${_formatNumber(inputAmount)}원이지만 마음이 중요하죠!" 모든 기여가 소중하고 의미 있어요. 함께 목표를 달성해봐요! 🎯';
+      }
+    } else if (transactionType == 'expense') {
+      if (category == 'booking') {
+        aiContent =
+            '예약 완료했어요! 🏨 "${_formatNumber(inputAmount)}원 지불했습니다." 드디어 구체적인 계획이 현실이 되고 있네요! 모임이 점점 기대되어요! 🎉';
+      } else if (category == 'transport') {
+        aiContent =
+            '교통편 준비 완료! ✈️ "${_formatNumber(inputAmount)}원으로 이동 수단을 확보했어요!" 이제 진짜 여행 가는 기분이 나기 시작하네요! 설레어요! 😆';
+      } else if (category == 'activity') {
+        aiContent =
+            '액티비티 예약했어요! 🎢 "${_formatNumber(inputAmount)}원이지만 추억은 priceless죠!" 함께 할 즐거운 시간을 생각하니 벌써 기대돼요! 🤩';
+      } else {
+        aiContent =
+            '공동 지출 처리했어요! 💳 "${_formatNumber(inputAmount)}원 사용했습니다." 모임을 위한 투자라고 생각하니까 기분이 좋네요! 함께하는 시간이 소중해요! 💖';
+      }
+    } else if (transactionType == 'refund') {
+      aiContent =
+          '환급 처리 완료! ↩️ "${_formatNumber(inputAmount)}원 돌려받았어요!" 예상치 못한 보너스네요. 이 돈으로 더 재미있는 계획을 세워볼까요? 😄';
+    }
+
+    setState(() {
+      diaryContent = aiContent;
+      _diaryController.text = aiContent;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('AI가 모임 기록을 생성했습니다! ✨'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   String _formatNumber(dynamic value) {
     if (value == null) return '';
     final number = int.tryParse(value.toString());
     if (number == null) return value.toString();
     return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 }

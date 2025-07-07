@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     
@@ -22,17 +22,19 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.32.5'
         channel: 'stable'
         
     - name: Get dependencies
       run: flutter pub get
+      working-directory: ./
       
     - name: Enable web
       run: flutter config --enable-web
       
     - name: Build web
-      run: flutter build web --release --web-renderer html --base-href /NH-time-capsule_v2/
+      run: flutter build web --release --base-href /NH-time-capsule_v2/
+      working-directory: ./
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -40,4 +42,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build/web
-        cname: false 
+        cname: false
+        force_orphan: true

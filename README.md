@@ -53,7 +53,7 @@ NH 금융 타임캡슐은 **금융과 함께하는 나만의 감정일기**를 �
 - Dart SDK 3.5.0 이상
 - Android Studio / VS Code
 - Git
-
+ 웹 배포 주소: https://sqaure-je.github.io/NH-time-capsule_v3/ 
 ### 클론 및 실행
 ```bash
 # 리포지토리 클론

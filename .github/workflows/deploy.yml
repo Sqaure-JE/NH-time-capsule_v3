@@ -1,39 +1,46 @@
-name: Deploy Flutter Web App
+name: Deploy Flutter Web to GitHub Pages
 
 on:
   push:
     branches: [ main ]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.22.3'
+        flutter-version: '3.32.5'
         channel: 'stable'
-    
-    - name: Enable web platform
-      run: flutter config --enable-web
-    
+        
     - name: Get dependencies
       run: flutter pub get
-    
-    - name: Build web app
+      working-directory: ./
+      
+    - name: Enable web
+      run: flutter config --enable-web
+      
+    - name: Build web
       run: flutter build web --release --base-href /NH-time-capsule_v3/
-    
+      working-directory: ./
+      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build/web
+        cname: false
+        force_orphan: true

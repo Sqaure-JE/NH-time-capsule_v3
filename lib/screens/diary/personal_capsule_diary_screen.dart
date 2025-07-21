@@ -82,13 +82,61 @@ class _PersonalCapsuleDiaryScreenState
     },
   ];
 
-  // 이정표
-  final List<Map<String, dynamic>> milestones = [
-    {'id': 'saving', 'emoji': '💰', 'text': '저축했어요', 'bonus': 10},
-    {'id': 'sacrifice', 'emoji': '🚫', 'text': '참았어요', 'bonus': 15},
-    {'id': 'progress', 'emoji': '📈', 'text': '목표에 가까워졌어요', 'bonus': 20},
-    {'id': 'challenge', 'emoji': '💪', 'text': '어려움을 극복했어요', 'bonus': 25},
-  ];
+  // 이정표 (카테고리별로 다르게 설정)
+  List<Map<String, dynamic>> get milestones {
+    final category = widget.capsule.category;
+
+    if (category == 'reading') {
+      // 독서 습관용 이정표
+      return [
+        {'id': 'daily_read', 'emoji': '📖', 'text': '오늘 독서했어요', 'bonus': 10},
+        {'id': 'focused_read', 'emoji': '🎯', 'text': '집중해서 읽었어요', 'bonus': 15},
+        {
+          'id': 'note_taking',
+          'emoji': '📝',
+          'text': '독서 노트를 작성했어요',
+          'bonus': 20
+        },
+        {
+          'id': 'deep_thinking',
+          'emoji': '💡',
+          'text': '깊이 생각하며 읽었어요',
+          'bonus': 25
+        },
+      ];
+    } else if (category == 'running') {
+      // 러닝 습관용 이정표
+      return [
+        {'id': 'daily_run', 'emoji': '🏃‍♂️', 'text': '오늘 러닝했어요', 'bonus': 10},
+        {
+          'id': 'distance_goal',
+          'emoji': '🎯',
+          'text': '목표 거리를 달렸어요',
+          'bonus': 15
+        },
+        {
+          'id': 'weather_challenge',
+          'emoji': '🌧️',
+          'text': '궂은 날씨에도 달렸어요',
+          'bonus': 20
+        },
+        {
+          'id': 'personal_record',
+          'emoji': '🏆',
+          'text': '개인 기록을 갱신했어요',
+          'bonus': 25
+        },
+      ];
+    } else {
+      // 기존 저축 관련 이정표
+      return [
+        {'id': 'saving', 'emoji': '💰', 'text': '저축했어요', 'bonus': 10},
+        {'id': 'sacrifice', 'emoji': '🚫', 'text': '참았어요', 'bonus': 15},
+        {'id': 'progress', 'emoji': '📈', 'text': '목표에 가까워졌어요', 'bonus': 20},
+        {'id': 'challenge', 'emoji': '💪', 'text': '어려움을 극복했어요', 'bonus': 25},
+      ];
+    }
+  }
 
   int get basePoints => 50;
   int get imagePoints => selectedImage != null ? 20 : 0;
@@ -115,14 +163,18 @@ class _PersonalCapsuleDiaryScreenState
       (m) => m['id'] == milestone,
       orElse: () => {},
     );
-    final progressToTarget = ((currentCapsule['currentAmount'] +
-                (int.tryParse(amount.replaceAll(',', '')) ?? 0)) /
-            currentCapsule['targetAmount']) *
-        100;
-    final remainingAmount = currentCapsule['targetAmount'] -
-        currentCapsule['currentAmount'] -
-        (int.tryParse(amount.replaceAll(',', '')) ?? 0);
-    final avgPerDay = currentCapsule['daysLeft'] > 0
+    final progressToTarget = currentCapsule['targetAmount'] == 0
+        ? 0.0 // 습관형 타임캡슐은 진행률 0으로 처리
+        : ((currentCapsule['currentAmount'] +
+                    (int.tryParse(amount.replaceAll(',', '')) ?? 0)) /
+                currentCapsule['targetAmount']) *
+            100;
+    final remainingAmount = currentCapsule['targetAmount'] == 0
+        ? 0 // 습관형 타임캡슐은 남은 금액 개념 없음
+        : currentCapsule['targetAmount'] -
+            currentCapsule['currentAmount'] -
+            (int.tryParse(amount.replaceAll(',', '')) ?? 0);
+    final avgPerDay = currentCapsule['daysLeft'] > 0 && remainingAmount > 0
         ? (remainingAmount / currentCapsule['daysLeft']).ceil()
         : 0;
 
@@ -181,6 +233,16 @@ class _PersonalCapsuleDiaryScreenState
     int remainingAmount,
     int avgPerDay,
   ) {
+    // 습관형 타임캡슐인지 확인
+    final isHabitCapsule = currentCapsule['targetAmount'] == 0;
+    final targetDays = isHabitCapsule ? 100 : 0; // 습관형은 100일 목표로 설정
+    final currentDays = isHabitCapsule ? currentCapsule['currentAmount'] : 0;
+    final remainingDays =
+        isHabitCapsule ? (targetDays - currentDays).clamp(0, targetDays) : 0;
+    final dailyProgress = isHabitCapsule
+        ? (currentDays / targetDays * 100).clamp(0, 100)
+        : progressToTarget;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -211,7 +273,9 @@ class _PersonalCapsuleDiaryScreenState
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'D-${widget.capsule.daysLeft}',
+                  isHabitCapsule
+                      ? '연속 ${currentDays}일'
+                      : 'D-${widget.capsule.daysLeft}',
                   style: const TextStyle(fontSize: 12, color: Colors.white),
                 ),
               ),
@@ -221,12 +285,14 @@ class _PersonalCapsuleDiaryScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '현재 진행률',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
+              Text(
+                isHabitCapsule ? '달성률' : '현재 진행률',
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               Text(
-                '${progressToTarget.round()}%',
+                isHabitCapsule
+                    ? '${dailyProgress.round()}%'
+                    : '${progressToTarget.round()}%',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -246,9 +312,13 @@ class _PersonalCapsuleDiaryScreenState
               ),
               Container(
                 height: 10,
-                width: progressToTarget > 100
-                    ? double.infinity
-                    : progressToTarget * 2.5,
+                width: isHabitCapsule
+                    ? dailyProgress > 100
+                        ? double.infinity
+                        : dailyProgress * 2.5
+                    : progressToTarget > 100
+                        ? double.infinity
+                        : progressToTarget * 2.5,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(5),
@@ -257,36 +327,72 @@ class _PersonalCapsuleDiaryScreenState
             ],
           ),
           const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${_formatNumber(currentCapsule['currentAmount'])}원',
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-              Text(
-                '목표: ${_formatNumber(currentCapsule['targetAmount'])}원',
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '남은 금액',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-              Text(
-                '${_formatNumber(remainingAmount)}원',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          // 습관형과 금융형 타임캡슐 구분 표시
+          if (isHabitCapsule) ...[
+            // 습관형 타임캡슐용 표시
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${currentDays}일',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
-              ),
-            ],
-          ),
+                Text(
+                  '목표: ${targetDays}일',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '목표까지',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                Text(
+                  '${remainingDays}일',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            // 기존 금융 타임캡슐용 표시
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_formatNumber(currentCapsule['currentAmount'])}원',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                Text(
+                  '목표: ${_formatNumber(currentCapsule['targetAmount'])}원',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '남은 금액',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                Text(
+                  '${_formatNumber(remainingAmount)}원',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -655,9 +761,9 @@ class _PersonalCapsuleDiaryScreenState
                         width: double.infinity,
                       ),
                     )
-                  : Column(
+                  : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Icon(
                           Icons.camera_alt,
                           size: 28,
@@ -701,8 +807,8 @@ class _PersonalCapsuleDiaryScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.card_giftcard, color: NHColors.orange, size: 22),
                   SizedBox(width: 8),
                   Text(
@@ -786,9 +892,9 @@ class _PersonalCapsuleDiaryScreenState
             style: TextStyle(fontSize: 12, color: NHColors.gray800),
           ),
           if (imagePoints > 0)
-            Text(
+            const Text(
               '• 추억 사진 추가 +20P',
-              style: const TextStyle(fontSize: 12, color: NHColors.gray800),
+              style: TextStyle(fontSize: 12, color: NHColors.gray800),
             ),
           if (milestonePoints > 0)
             Text(
@@ -796,9 +902,9 @@ class _PersonalCapsuleDiaryScreenState
               style: const TextStyle(fontSize: 12, color: NHColors.gray800),
             ),
           if (amountPoints > 0)
-            Text(
+            const Text(
               '• 금액 추가 기록 +15P',
-              style: const TextStyle(fontSize: 12, color: NHColors.gray800),
+              style: TextStyle(fontSize: 12, color: NHColors.gray800),
             ),
         ],
       ),
@@ -948,12 +1054,46 @@ class _PersonalCapsuleDiaryScreenState
     // 현재 진행 상황 정보
     final currentAmount = currentCapsule['currentAmount'];
     final targetAmount = currentCapsule['targetAmount'];
-    final progressPercentage = (currentAmount / targetAmount * 100).round();
+    final progressPercentage = targetAmount == 0
+        ? (currentAmount).round() // 습관형은 현재 연속 일수
+        : (currentAmount / targetAmount * 100).round();
     final emotionName = selectedEmotionData['name'];
     final inputAmount = int.tryParse(amount.replaceAll(',', '')) ?? 0;
 
-    // 이정표별 AI 추천
-    if (milestone == 'saving') {
+    // 이정표별 AI 추천 (카테고리별로 다르게 처리)
+    final category = widget.capsule.category;
+
+    if (category == 'reading') {
+      // 독서 습관 관련 메시지
+      if (milestone == 'daily_read') {
+        aiContent =
+            '${emotionName}가 뿌듯하게 말해요! 📖 "오늘도 독서하는 시간을 가졌어!" ${progressPercentage}일 연속 독서 중이에요. 꾸준한 독서 습관이 정말 대단해요!';
+      } else if (milestone == 'focused_read') {
+        aiContent =
+            '${emotionName}가 집중하며 말해요! 🎯 "정말 집중해서 읽었어!" ${progressPercentage}일째 꾸준히 이어가고 있어요. 깊이 있는 독서가 더 큰 성장을 만들어요!';
+      } else if (milestone == 'note_taking') {
+        aiContent =
+            '${emotionName}가 성취감을 느끼며 말해요! 📝 "독서 노트까지 작성했어!" ${progressPercentage}일 동안 쌓인 기록들이 소중한 자산이 될 거예요!';
+      } else if (milestone == 'deep_thinking') {
+        aiContent =
+            '${emotionName}가 깊이 생각하며 말해요! 💡 "책 내용을 깊이 생각해봤어!" ${progressPercentage}일째 성찰하는 독서를 이어가고 있어요!';
+      }
+    } else if (category == 'running') {
+      // 러닝 습관 관련 메시지
+      if (milestone == 'daily_run') {
+        aiContent =
+            '${emotionName}가 상쾌하게 말해요! 🏃‍♂️ "오늘도 러닝 완료!" ${progressPercentage}일 연속 달리기 중이에요. 꾸준한 운동 습관이 건강을 만들어가고 있어요!';
+      } else if (milestone == 'distance_goal') {
+        aiContent =
+            '${emotionName}가 자랑스럽게 말해요! 🎯 "목표 거리를 완주했어!" ${progressPercentage}일째 목표를 달성하고 있어요. 계획한 목표를 달성하는 의지가 정말 대단해요!';
+      } else if (milestone == 'weather_challenge') {
+        aiContent =
+            '${emotionName}가 당당하게 말해요! 🌧️ "궂은 날씨에도 포기하지 않았어!" ${progressPercentage}일 동안 어떤 조건에도 굴복하지 않는 정신력이 훌륭해요!';
+      } else if (milestone == 'personal_record') {
+        aiContent =
+            '${emotionName}가 감격스럽게 외쳐요! 🏆 "개인 기록 갱신했어!" ${progressPercentage}일째 자신의 한계를 뛰어넘고 있어요!';
+      }
+    } else if (milestone == 'saving') {
       if (progressPercentage >= 80) {
         aiContent =
             '와! ${emotionName}가 저축하며 신나서 어쩔 줄 모르고 있어요! 💰 "벌써 ${progressPercentage}%나 모았다고?!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더 모았어!' : ''} 목표 달성이 코앞이네요!';
@@ -964,31 +1104,6 @@ class _PersonalCapsuleDiaryScreenState
         aiContent =
             '${emotionName}가 저축을 시작하며 희망차게 말해요! ✨ "목표를 향해 첫 걸음!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원 저축했어요.' : ''} 작은 시작이지만 큰 꿈을 향해 나아가고 있어요!';
       }
-    } else if (milestone == 'sacrifice') {
-      if (selectedEmotion == 'joy') {
-        aiContent =
-            '${emotionName}가 뿌듯하게 말해요! 😊 "참는 것도 이제 습관이 됐어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 아껴서' : ''} 목표에 한 걸음 더 가까워졌어요. 이런 작은 절약이 모여 큰 성과를 만들어요!';
-      } else if (selectedEmotion == 'sadness') {
-        aiContent =
-            '${emotionName}가 아쉬워하면서도 말해요... 😢 "참기 힘들지만 목표를 위해서!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 아꼈지만' : ''} 때로는 포기하는 것도 용기가 필요해요. 조금만 더 힘내요!';
-      } else {
-        aiContent =
-            '${emotionName}가 의지를 다지며 말해요! 💪 "목표를 위해 참을 수 있어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 절약했어요.' : ''} 이런 결단력이 성공의 열쇠예요!';
-      }
-    } else if (milestone == 'progress') {
-      if (progressPercentage >= 90) {
-        aiContent =
-            '${emotionName}가 감격스럽게 외쳐요! 🎉 "드디어! 목표가 눈앞에!" 90%를 넘어선 지금, ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원을 더해서' : ''} 성공의 달콤함을 미리 맛보고 있어요!';
-      } else if (progressPercentage >= 70) {
-        aiContent =
-            '${emotionName}가 자신감 넘치게 말해요! 🚀 "70% 돌파! 이제 진짜 보여!" ${inputAmount > 0 ? '오늘 ${_formatNumber(inputAmount)}원 추가로' : ''} 목표 달성이 현실이 되고 있어요!';
-      } else {
-        aiContent =
-            '${emotionName}가 차근차근 말해요! 📊 "꾸준히 진행 중이야!" ${progressPercentage}% 달성했고, ${inputAmount > 0 ? '오늘도 ${_formatNumber(inputAmount)}원을 보탰어요.' : ''} 매일매일이 소중한 진전이에요!';
-      }
-    } else if (milestone == 'challenge') {
-      aiContent =
-          '${emotionName}가 당당하게 말해요! 💪 "어려움도 이겨냈어!" ${inputAmount > 0 ? '${_formatNumber(inputAmount)}원을 모으는 것이 쉽지 않았지만' : ''} 포기하지 않고 계속 도전한 자신이 정말 대단해요!';
     } else {
       // 기본 감정별 메시지
       if (selectedEmotion == 'joy') {

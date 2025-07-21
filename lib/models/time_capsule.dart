@@ -45,7 +45,13 @@ class TimeCapsule {
   });
 
   // 진행률 계산 (0.0 ~ 1.0)
-  double get progress => currentAmount / targetAmount;
+  double get progress {
+    if (targetAmount == 0) {
+      // 습관형 타임캡슐: 100일 기준으로 계산
+      return (currentAmount / 100).clamp(0.0, 1.0);
+    }
+    return (currentAmount / targetAmount).clamp(0.0, 1.0);
+  }
 
   // 진행률 퍼센트
   int get progressPercentage => (progress * 100).round();
@@ -55,6 +61,7 @@ class TimeCapsule {
 
   // 남은 일수
   int get daysLeft {
+    if (isUnlimitedPeriod) return 999999; // 무제한은 매우 큰 수로 표시
     final now = DateTime.now();
     final difference = endDate.difference(now).inDays;
     return difference > 0 ? difference : 0;
@@ -69,7 +76,14 @@ class TimeCapsule {
       (status == CapsuleStatus.active || status == CapsuleStatus.completed);
 
   // 만료 여부
-  bool get isExpired => DateTime.now().isAfter(endDate);
+  bool get isExpired =>
+      isUnlimitedPeriod ? false : DateTime.now().isAfter(endDate);
+
+  // 무제한 기간 여부
+  bool get isUnlimitedPeriod => durationInMonths >= 9999;
+
+  // 일반 금융일기와 동일한 처리 여부 (무제한 기간 타임캡슐)
+  bool get isGeneralDiaryType => isUnlimitedPeriod;
 
   // 모임형 여부
   bool get isGroup => type == CapsuleType.group;
@@ -79,6 +93,7 @@ class TimeCapsule {
 
   // 기간 (개월)
   int get durationInMonths {
+    if (endDate.year >= 9999) return 9999; // 무제한 기간 표시
     return ((endDate.difference(startDate).inDays) / 30).round();
   }
 
@@ -258,32 +273,32 @@ class TimeCapsule {
 
   // 샘플 멤버 정보 (실제 데이터 연동 시 교체)
   List<MemberInfo> get sampleMembers => [
-    MemberInfo('김올리', 500000, 25.0, '👤', true),
-    MemberInfo('박수빈', 500000, 25.0, '👩', false),
-    MemberInfo('이정은', 500000, 25.0, '👨', false),
-    MemberInfo('최민수', 500000, 25.0, '👩‍🦱', false),
-  ];
+        MemberInfo('김올리', 500000, 25.0, '👤', true),
+        MemberInfo('박수빈', 500000, 25.0, '👩', false),
+        MemberInfo('이정은', 500000, 25.0, '👨', false),
+        MemberInfo('최민수', 500000, 25.0, '👩‍🦱', false),
+      ];
   List<ExpenseInfo> get sampleExpenses => [
-    ExpenseInfo('KTX', 480000, 24.0),
-    ExpenseInfo('숙박비', 600000, 30.0),
-    ExpenseInfo('식비', 640000, 32.0),
-    ExpenseInfo('관광', 280000, 14.0),
-  ];
+        ExpenseInfo('KTX', 480000, 24.0),
+        ExpenseInfo('숙박비', 600000, 30.0),
+        ExpenseInfo('식비', 640000, 32.0),
+        ExpenseInfo('관광', 280000, 14.0),
+      ];
   List<HighlightInfo> get sampleHighlights => [
-    HighlightInfo('2025.05.01', '해운대 바다', '120,000원', '전원'),
-    HighlightInfo('2025.05.02', '광안리 야경', '80,000원', '전원'),
-    HighlightInfo('2025.05.03', '국제시장 투어', '60,000원', '전원'),
-  ];
+        HighlightInfo('2025.05.01', '해운대 바다', '120,000원', '전원'),
+        HighlightInfo('2025.05.02', '광안리 야경', '80,000원', '전원'),
+        HighlightInfo('2025.05.03', '국제시장 투어', '60,000원', '전원'),
+      ];
   List<AchievementInfo> get sampleAchievements => [
-    AchievementInfo('👥', '팀워크', '4명이 함께'),
-    AchievementInfo(
-      '💰',
-      '효율적 지출',
-      '${achievementRate.toStringAsFixed(1)}% 달성',
-    ),
-    AchievementInfo('📸', '추억 수집', '50장 사진'),
-    AchievementInfo('⚖️', '정산 완료', '모든 정산 완료'),
-  ];
+        AchievementInfo('👥', '팀워크', '4명이 함께'),
+        AchievementInfo(
+          '💰',
+          '효율적 지출',
+          '${achievementRate.toStringAsFixed(1)}% 달성',
+        ),
+        AchievementInfo('📸', '추억 수집', '50장 사진'),
+        AchievementInfo('⚖️', '정산 완료', '모든 정산 완료'),
+      ];
 
   // --- 개인형 상세 정보 샘플용 getter들 ---
   String get period =>
@@ -291,41 +306,41 @@ class TimeCapsule {
   MainEmotionInfo get mainEmotion =>
       MainEmotionInfo('😊', '기쁨이', 9, 68, '+2레벨');
   List<EmotionStatInfo> get emotionStats => [
-    EmotionStatInfo('😊', '기쁨이', 68, NHColors.joy),
-    EmotionStatInfo('😰', '불안이', 15, NHColors.fear),
-    EmotionStatInfo('😢', '슬픔이', 10, NHColors.sadness),
-    EmotionStatInfo('😡', '분노', 4, NHColors.anger),
-    EmotionStatInfo('🤢', '까칠이', 3, NHColors.disgust),
-  ];
+        EmotionStatInfo('😊', '기쁨이', 68, NHColors.joy),
+        EmotionStatInfo('😰', '불안이', 15, NHColors.fear),
+        EmotionStatInfo('😢', '슬픔이', 10, NHColors.sadness),
+        EmotionStatInfo('😡', '분노', 4, NHColors.anger),
+        EmotionStatInfo('🤢', '까칠이', 3, NHColors.disgust),
+      ];
   List<PersonalHighlightInfo> get personalHighlights => [
-    PersonalHighlightInfo(
-      '2025.02.14',
-      '발렌타인데이 카페 절약',
-      '😊',
-      '+50,000원',
-      '제주도 카페 투어를 위해 커피값 절약',
-    ),
-    PersonalHighlightInfo(
-      '2025.04.15',
-      '부업 수입으로 여행자금 추가',
-      '😊',
-      '+200,000원',
-      '프리랜서 수입으로 제주도 숙박비 마련',
-    ),
-    PersonalHighlightInfo(
-      '2025.06.01',
-      '목표 달성! 제주도 항공권 예약',
-      '😊',
-      '+100,000원',
-      '제주도 여행 목표 금액 달성 완료',
-    ),
-  ];
+        PersonalHighlightInfo(
+          '2025.02.14',
+          '발렌타인데이 카페 절약',
+          '😊',
+          '+50,000원',
+          '제주도 카페 투어를 위해 커피값 절약',
+        ),
+        PersonalHighlightInfo(
+          '2025.04.15',
+          '부업 수입으로 여행자금 추가',
+          '😊',
+          '+200,000원',
+          '프리랜서 수입으로 제주도 숙박비 마련',
+        ),
+        PersonalHighlightInfo(
+          '2025.06.01',
+          '목표 달성! 제주도 항공권 예약',
+          '😊',
+          '+100,000원',
+          '제주도 여행 목표 금액 달성 완료',
+        ),
+      ];
   List<PersonalAchievementInfo> get personalAchievements => [
-    PersonalAchievementInfo('🏆', '제주도 여행 목표 달성', '112% 달성'),
-    PersonalAchievementInfo('📅', '꾸준한 저축 기록', '28일 기록'),
-    PersonalAchievementInfo('📸', '제주도 사진 수집가', '15장 사진'),
-    PersonalAchievementInfo('😊', '긍정적인 여행 준비', '기쁨이 68%'),
-  ];
+        PersonalAchievementInfo('🏆', '제주도 여행 목표 달성', '112% 달성'),
+        PersonalAchievementInfo('📅', '꾸준한 저축 기록', '28일 기록'),
+        PersonalAchievementInfo('📸', '제주도 사진 수집가', '15장 사진'),
+        PersonalAchievementInfo('😊', '긍정적인 여행 준비', '기쁨이 68%'),
+      ];
 }
 
 extension TimeCapsuleStatusExt on TimeCapsule {

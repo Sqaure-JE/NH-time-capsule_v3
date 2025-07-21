@@ -37,7 +37,9 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
   bool get isStep1Valid =>
       selectedCategory.isNotEmpty &&
       title.isNotEmpty &&
-      targetAmount.isNotEmpty &&
+      (targetAmount.isNotEmpty &&
+          (targetAmount == '0' ||
+              int.tryParse(targetAmount.replaceAll(',', '')) != null)) &&
       selectedPeriod.isNotEmpty;
 
   @override
@@ -467,44 +469,126 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
               color: NHColors.gray800,
             ),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            children: recommendedAmounts.map((amount) {
-              final isSelected = targetAmount == amount.toString();
-              return ChoiceChip(
-                label: Text(NumberFormatter.formatCurrency(amount)),
-                selected: isSelected,
-                onSelected: (_) {
-                  setState(() {
-                    targetAmount = amount.toString();
-                  });
-                },
-                selectedColor: NHColors.primary.withOpacity(0.15),
-                backgroundColor: NHColors.gray50,
-                labelStyle: TextStyle(
-                  color: isSelected ? NHColors.primary : NHColors.gray700,
-                  fontWeight: FontWeight.w500,
-                ),
-              );
-            }).toList(),
+          const SizedBox(height: 8),
+          Text(
+            '금융 저축 목표가 있으시면 설정해주세요. 습관 형성이 목적이면 "없음"을 선택하세요.',
+            style: TextStyle(
+              fontSize: 13,
+              color: NHColors.gray600,
+            ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
+
+          // "없음" 옵션 추가
+          GestureDetector(
+            onTap: () {
               setState(() {
-                targetAmount = value;
+                if (targetAmount == '0') {
+                  targetAmount = ''; // 이미 선택된 상태면 해제
+                } else {
+                  targetAmount = '0'; // 선택되지 않은 상태면 선택
+                }
               });
             },
-            decoration: const InputDecoration(
-              hintText: '직접 입력 (숫자만)',
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: NHColors.primary, width: 2),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: targetAmount == '0'
+                    ? NHColors.success.withOpacity(0.1)
+                    : NHColors.gray50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color:
+                      targetAmount == '0' ? NHColors.success : NHColors.gray300,
+                  width: targetAmount == '0' ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: targetAmount == '0'
+                        ? NHColors.success
+                        : NHColors.gray400,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '없음 (습관 형성용)',
+                    style: TextStyle(
+                      color: targetAmount == '0'
+                          ? NHColors.success
+                          : NHColors.gray700,
+                      fontWeight: targetAmount == '0'
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '독서, 러닝, 기타 습관',
+                    style: TextStyle(
+                      color: NHColors.gray500,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+
+          // 기존 추천 금액들
+          if (targetAmount != '0') ...[
+            Text(
+              '추천 금액',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: NHColors.gray700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: recommendedAmounts.map((amount) {
+                final isSelected = targetAmount == amount.toString();
+                return ChoiceChip(
+                  label: Text(NumberFormatter.formatCurrency(amount)),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    setState(() {
+                      targetAmount = amount.toString();
+                    });
+                  },
+                  selectedColor: NHColors.primary.withOpacity(0.15),
+                  backgroundColor: NHColors.gray50,
+                  labelStyle: TextStyle(
+                    color: isSelected ? NHColors.primary : NHColors.gray700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  targetAmount = value;
+                });
+              },
+              decoration: const InputDecoration(
+                hintText: '직접 입력 (숫자만)',
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: NHColors.primary, width: 2),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -916,6 +1000,11 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
 
   void _createCapsule() {
     // 타임캡슐 생성 로직
+    final periodMonths = int.tryParse(selectedPeriod) ?? 6;
+    final endDate = periodMonths >= 9999
+        ? DateTime(9999, 12, 31) // 무제한 기간
+        : DateTime.now().add(Duration(days: periodMonths * 30));
+
     final capsule = TimeCapsule(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
@@ -923,9 +1012,7 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
       type: selectedType,
       targetAmount: int.tryParse(targetAmount.replaceAll(',', '')) ?? 0,
       startDate: DateTime.now(),
-      endDate: DateTime.now().add(
-        Duration(days: (int.tryParse(selectedPeriod) ?? 6) * 30),
-      ),
+      endDate: endDate,
       firstMessage: firstMessage.isNotEmpty ? firstMessage : null,
       firstImagePath: selectedImage?.path,
       createdAt: DateTime.now(),
@@ -938,7 +1025,7 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
       builder: (context) => AlertDialog(
         title: const Text('🎉 타임캡슐 생성 완료!'),
         content: Text(
-          '${capsule.title} 타임캡슐이 생성되었습니다!\n기본 100P + 첫 기록 50P 적립!',
+          '${capsule.title} 타임캡슐이 생성되었습니다!\n${capsule.isUnlimitedPeriod ? '무제한 기간' : capsule.durationInMonths.toString() + '개월'} 타임캡슐로 설정되었어요!\n기본 100P + 첫 기록 50P 적립!',
         ),
         actions: [
           TextButton(

@@ -1,3 +1,39 @@
+class Coupon {
+  final String id;
+  final String title;
+  final String description;
+  final String icon; // emoji or asset
+  final bool isUsed; // true: 받은 쿠폰, false: 앞으로 받을 쿠폰
+
+  Coupon({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.icon,
+    this.isUsed = false,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'icon': icon,
+      'isUsed': isUsed,
+    };
+  }
+
+  factory Coupon.fromMap(Map<String, dynamic> map) {
+    return Coupon(
+      id: map['id'],
+      title: map['title'],
+      description: map['description'],
+      icon: map['icon'],
+      isUsed: map['isUsed'] ?? false,
+    );
+  }
+}
+
 class UserData {
   final String id;
   final String name;
@@ -11,6 +47,7 @@ class UserData {
   final int totalDiaryCount;
   final int totalCapsuleCount;
   final int completedCapsuleCount;
+  final List<Coupon> coupons;
 
   UserData({
     required this.id,
@@ -25,6 +62,7 @@ class UserData {
     this.totalDiaryCount = 0,
     this.totalCapsuleCount = 0,
     this.completedCapsuleCount = 0,
+    this.coupons = const [],
   });
 
   // 오늘 일기 작성 여부
@@ -84,6 +122,7 @@ class UserData {
       'totalDiaryCount': totalDiaryCount,
       'totalCapsuleCount': totalCapsuleCount,
       'completedCapsuleCount': completedCapsuleCount,
+      'coupons': coupons.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -104,6 +143,7 @@ class UserData {
       totalDiaryCount: map['totalDiaryCount'] ?? 0,
       totalCapsuleCount: map['totalCapsuleCount'] ?? 0,
       completedCapsuleCount: map['completedCapsuleCount'] ?? 0,
+      coupons: List<Coupon>.from(map['coupons'].map((e) => Coupon.fromMap(e))),
     );
   }
 
@@ -121,6 +161,7 @@ class UserData {
     int? totalDiaryCount,
     int? totalCapsuleCount,
     int? completedCapsuleCount,
+    List<Coupon>? coupons,
   }) {
     return UserData(
       id: id ?? this.id,
@@ -136,6 +177,7 @@ class UserData {
       totalCapsuleCount: totalCapsuleCount ?? this.totalCapsuleCount,
       completedCapsuleCount:
           completedCapsuleCount ?? this.completedCapsuleCount,
+      coupons: coupons ?? this.coupons,
     );
   }
 
@@ -152,9 +194,8 @@ class UserData {
   // 일기 작성 기록
   UserData recordDiary() {
     final now = DateTime.now();
-    final newConsecutiveDays = hasWrittenToday
-        ? consecutiveLoginDays
-        : consecutiveLoginDays + 1;
+    final newConsecutiveDays =
+        hasWrittenToday ? consecutiveLoginDays : consecutiveLoginDays + 1;
 
     return copyWith(
       lastDiaryDate: now,
@@ -188,6 +229,36 @@ class UserData {
       totalDiaryCount: 45,
       totalCapsuleCount: 4,
       completedCapsuleCount: 1,
+      coupons: [
+        Coupon(
+          id: 'coupon1',
+          title: '음식할인쿠폰',
+          description: '전국 음식점 20% 할인',
+          icon: '🍔',
+          isUsed: true,
+        ),
+        Coupon(
+          id: 'coupon2',
+          title: '여행보험 가입쿠폰',
+          description: '여행자 보험 무료 가입',
+          icon: '🛡️',
+          isUsed: true,
+        ),
+        Coupon(
+          id: 'coupon3',
+          title: '리디북스 1개월 이용권',
+          description: '전자책 무제한 1개월',
+          icon: '📚',
+          isUsed: false,
+        ),
+        Coupon(
+          id: 'coupon4',
+          title: '운동화마트 할인쿠폰',
+          description: '운동화 10% 할인',
+          icon: '👟',
+          isUsed: false,
+        ),
+      ],
     );
   }
 

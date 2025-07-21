@@ -63,6 +63,18 @@ class AppConstants {
       'name': '취미생활',
       'color': 0xFFFF9800,
     },
+    'running': {
+      'id': 'running',
+      'icon': '🏃‍♂️',
+      'name': '러닝',
+      'color': 0xFF1976D2,
+    },
+    'reading': {
+      'id': 'reading',
+      'icon': '📖',
+      'name': '독서',
+      'color': 0xFF8E44AD,
+    },
     'relationship': {
       'id': 'relationship',
       'icon': '💕',
@@ -148,6 +160,7 @@ class AppConstants {
     {'id': '3', 'label': '3개월', 'desc': '단기 목표'},
     {'id': '6', 'label': '6개월', 'desc': '추천'},
     {'id': '12', 'label': '1년', 'desc': '장기 목표'},
+    {'id': '9999', 'label': '무제한', 'desc': '기간 제한 없음'},
   ];
 
   // UI 상수

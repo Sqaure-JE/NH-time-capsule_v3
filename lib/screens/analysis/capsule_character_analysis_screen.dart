@@ -30,6 +30,10 @@ class _CapsuleCharacterAnalysisScreenState
         return _getAnniversaryAnalysisData();
       case 'capsule_9': // 부산 여행 자금 (완료)
         return _getBusanAnalysisData();
+      case 'capsule_running': // 러닝 타임캡슐
+        return _getRunningAnalysisData();
+      case 'capsule_reading': // 독서타임캡슐
+        return _getReadingAnalysisData();
       default:
         return _getNewCapsuleAnalysisData(); // 새로운 타임캡슐 기본값
     }
@@ -622,6 +626,256 @@ class _CapsuleCharacterAnalysisScreenState
     };
   }
 
+  // 러닝 타임캡슐 분석 데이터
+  Map<String, dynamic> _getRunningAnalysisData() {
+    return {
+      'capsuleTitle': '🏃‍♂️ 러닝 습관',
+      'period': '3개월',
+      'startDate': '2024.10.01',
+      'endDate': '2025.01.01',
+      'totalDiaries': 85,
+      'totalPoints': 0, // 포인트 개념 제거
+      'mainCharacter': {
+        'emoji': '😊',
+        'name': '기쁨이',
+        'level': 8,
+        'percentage': 90,
+        'growth': '+4레벨',
+        'color': NHColors.joy,
+      },
+      'emotionJourney': [
+        {
+          'phase': '시작',
+          'period': '1개월',
+          'mainEmotion': '😰',
+          'description': '매일 러닝에 대한 부담감과 체력적 부족',
+          'percentage': 40,
+          'color': NHColors.fear,
+        },
+        {
+          'phase': '중반',
+          'period': '2개월',
+          'mainEmotion': '😊',
+          'description': '꾸준한 러닝으로 체력과 자신감 증가',
+          'percentage': 75,
+          'color': NHColors.joy,
+        },
+        {
+          'phase': '마지막',
+          'period': '3개월',
+          'mainEmotion': '😊',
+          'description': '러닝이 일상이 되어 자연스러운 루틴 완성',
+          'percentage': 95,
+          'color': NHColors.joy,
+        },
+      ],
+      'monthlyEmotionChanges': [
+        {
+          'month': '10월',
+          'joy': 35,
+          'fear': 40,
+          'sadness': 15,
+          'anger': 6,
+          'disgust': 4,
+        },
+        {
+          'month': '11월',
+          'joy': 65,
+          'fear': 20,
+          'sadness': 10,
+          'anger': 3,
+          'disgust': 2,
+        },
+        {
+          'month': '12월',
+          'joy': 85,
+          'fear': 8,
+          'sadness': 4,
+          'anger': 2,
+          'disgust': 1,
+        },
+      ],
+      'successPatterns': [
+        {'pattern': '매일 정해진 시간 러닝', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '러닝 기록 및 거리 측정', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '주간 러닝 목표 설정', 'frequency': '주 1회', 'effectiveness': '중간'},
+        {
+          'pattern': '체력 및 속도 개선 체크',
+          'frequency': '주 2회',
+          'effectiveness': '중간'
+        },
+      ],
+      'recommendations': [
+        {
+          'type': '러닝 도구',
+          'name': '러닝 워치',
+          'reason': '정확한 거리와 페이스 측정',
+          'benefit': '실시간 운동량 모니터링',
+        },
+        {
+          'type': '습관 앱',
+          'name': '러닝 기록 앱',
+          'reason': '일일 러닝 기록 및 동기 부여',
+          'benefit': '연속 러닝일 확인',
+        },
+      ],
+      'achievements': [
+        {'icon': '🎯', 'title': '완벽한 루틴', 'desc': '85일 연속 러닝'},
+        {'icon': '📈', 'title': '감정 성장', 'desc': '체력과 자신감 크게 향상'},
+        {'icon': '📅', 'title': '습관 완성', 'desc': '3개월 지속 성공'},
+        {'icon': '💪', 'title': '체력 향상', 'desc': '평균 페이스 30초 단축'},
+      ],
+    };
+  }
+
+  // 독서 타임캡슐 분석 데이터
+  Map<String, dynamic> _getReadingAnalysisData() {
+    return {
+      'capsuleTitle': '📖 독서 습관',
+      'period': '2개월',
+      'startDate': '2024.11.01',
+      'endDate': '2025.01.01',
+      'totalDiaries': 58,
+      'totalPoints': 0, // 포인트 개념 제거
+      'mainCharacter': {
+        'emoji': '😊',
+        'name': '기쁨이',
+        'level': 6,
+        'percentage': 85,
+        'growth': '+3레벨',
+        'color': NHColors.joy,
+      },
+      'emotionJourney': [
+        {
+          'phase': '시작',
+          'period': '2주',
+          'mainEmotion': '😰',
+          'description': '매일 독서 시간 확보의 어려움과 집중력 부족',
+          'percentage': 35,
+          'color': NHColors.fear,
+        },
+        {
+          'phase': '중반',
+          'period': '4-6주',
+          'mainEmotion': '😊',
+          'description': '독서가 주는 즐거움과 지식 습득의 기쁨',
+          'percentage': 70,
+          'color': NHColors.joy,
+        },
+        {
+          'phase': '마지막',
+          'period': '7-8주',
+          'mainEmotion': '😊',
+          'description': '독서가 자연스러운 일상이 된 만족감',
+          'percentage': 90,
+          'color': NHColors.joy,
+        },
+      ],
+      'monthlyEmotionChanges': [
+        {
+          'month': '11월',
+          'joy': 50,
+          'fear': 30,
+          'sadness': 12,
+          'anger': 5,
+          'disgust': 3,
+        },
+        {
+          'month': '12월',
+          'joy': 80,
+          'fear': 10,
+          'sadness': 6,
+          'anger': 2,
+          'disgust': 2,
+        },
+      ],
+      'successPatterns': [
+        {'pattern': '매일 정해진 시간 독서', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '독서 후 감상 기록', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '책별 목표 페이지 설정', 'frequency': '주 3회', 'effectiveness': '중간'},
+        {'pattern': '독서 환경 최적화', 'frequency': '매일', 'effectiveness': '중간'},
+      ],
+      'recommendations': [
+        {
+          'type': '독서 도구',
+          'name': '독서 노트',
+          'reason': '인상 깊은 구절과 감상 기록',
+          'benefit': '기억에 오래 남는 독서',
+        },
+        {
+          'type': '독서 환경',
+          'name': '조용한 독서 공간',
+          'reason': '집중력 향상을 위한 전용 공간',
+          'benefit': '몰입도 높은 독서',
+        },
+      ],
+      'achievements': [
+        {'icon': '🎯', 'title': '꾸준한 독서', 'desc': '58일 연속 독서'},
+        {'icon': '📈', 'title': '감정 성장', 'desc': '독서 즐거움 발견'},
+        {'icon': '📅', 'title': '습관 형성', 'desc': '2개월 지속 성공'},
+        {'icon': '📚', 'title': '지식 확장', 'desc': '다양한 분야 12권 완독'},
+      ],
+    };
+  }
+
+  // 새로운 타임캡슐 분석 데이터
+  Map<String, dynamic> _getNewCapsuleAnalysisData() {
+    return {
+      'capsuleTitle': '✨ 새로운 타임캡슐',
+      'period': '1개월',
+      'startDate': '2024.09.23',
+      'endDate': '2024.10.23',
+      'totalDiaries': 1,
+      'totalPoints': 30,
+      'mainCharacter': {
+        'emoji': '😊',
+        'name': '기쁨이',
+        'level': 1,
+        'percentage': 80,
+        'growth': '+0레벨',
+        'color': NHColors.joy,
+      },
+      'emotionJourney': [
+        {
+          'phase': '시작',
+          'period': '1주일',
+          'mainEmotion': '😊',
+          'description': '새로운 저축 습관 형성의 기쁨',
+          'percentage': 80,
+          'color': NHColors.joy,
+        },
+      ],
+      'monthlyEmotionChanges': [
+        {
+          'month': '9월',
+          'joy': 80,
+          'fear': 10,
+          'sadness': 5,
+          'anger': 3,
+          'disgust': 2,
+        },
+      ],
+      'successPatterns': [
+        {'pattern': '기본 저축', 'frequency': '매일', 'effectiveness': '높음'},
+        {'pattern': '습관 형성', 'frequency': '주 3회', 'effectiveness': '중간'},
+      ],
+      'recommendations': [
+        {
+          'type': '적금상품',
+          'name': 'NH기본 적금',
+          'reason': '안정적인 저축 습관 형성',
+          'rate': '3.0%',
+        },
+      ],
+      'achievements': [
+        {'icon': '🎯', 'title': '시작', 'desc': '80% 달성'},
+        {'icon': '📈', 'title': '성장', 'desc': '기쁨이 Lv.1'},
+        {'icon': '📅', 'title': '기록', 'desc': '1일 기록'},
+        {'icon': '💰', 'title': '저축', 'desc': '기본 습관'},
+      ],
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -679,8 +933,8 @@ class _CapsuleCharacterAnalysisScreenState
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          '6개월간의 감정 변화와 성장 스토리',
+        Text(
+          '${analysisData['period']}간의 감정 변화와 성장 스토리',
           style: TextStyle(fontSize: 16, color: NHColors.gray600),
           textAlign: TextAlign.center,
         ),
@@ -728,12 +982,14 @@ class _CapsuleCharacterAnalysisScreenState
               ),
               Column(
                 children: [
-                  const Text(
-                    '총 포인트',
+                  Text(
+                    analysisData['totalPoints'] == 0 ? '연속 달성' : '총 포인트',
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   Text(
-                    '${analysisData['totalPoints']}P',
+                    analysisData['totalPoints'] == 0
+                        ? '${analysisData['totalDiaries']}일'
+                        : '${analysisData['totalPoints']}P',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -1305,29 +1561,50 @@ class _CapsuleCharacterAnalysisScreenState
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(
-                Icons.calendar_today,
-                size: 16,
-                color: NHColors.gray500,
-              ),
-              const SizedBox(width: 4),
-              Text('기간: ${analysisData['period'] ?? ''}'),
-              const SizedBox(width: 16),
-              const Icon(Icons.flag, size: 16, color: NHColors.gray500),
-              const SizedBox(width: 4),
-              Text('목표금액: 1,500,000원'), // 샘플
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.show_chart, size: 16, color: NHColors.gray500),
-              const SizedBox(width: 4),
-              Text('진행률: 112%'), // 샘플
-            ],
-          ),
+          if (analysisData['totalPoints'] != 0) ...[
+            // 금융 타임캡슐인 경우만 목표금액과 진행률 표시
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: NHColors.gray500,
+                ),
+                const SizedBox(width: 4),
+                Text('기간: ${analysisData['period'] ?? ''}'),
+                const SizedBox(width: 16),
+                const Icon(Icons.flag, size: 16, color: NHColors.gray500),
+                const SizedBox(width: 4),
+                Text('목표금액: 1,500,000원'), // 샘플
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.show_chart, size: 16, color: NHColors.gray500),
+                const SizedBox(width: 4),
+                Text('진행률: 112%'), // 샘플
+              ],
+            ),
+          ] else ...[
+            // 습관형 타임캡슐인 경우 기간만 표시
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: NHColors.gray500,
+                ),
+                const SizedBox(width: 4),
+                Text('기간: ${analysisData['period'] ?? ''}'),
+                const SizedBox(width: 16),
+                const Icon(Icons.fitness_center,
+                    size: 16, color: NHColors.gray500),
+                const SizedBox(width: 4),
+                Text('연속 달성: ${analysisData['totalDiaries']}일'),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -1377,64 +1654,6 @@ class _CapsuleCharacterAnalysisScreenState
         ],
       ),
     );
-  }
-
-  // 새로운 타임캡슐 분석 데이터
-  Map<String, dynamic> _getNewCapsuleAnalysisData() {
-    return {
-      'capsuleTitle': '✨ 새로운 타임캡슐',
-      'period': '1개월',
-      'startDate': '2024.09.23',
-      'endDate': '2024.10.23',
-      'totalDiaries': 1,
-      'totalPoints': 30,
-      'mainCharacter': {
-        'emoji': '😊',
-        'name': '기쁨이',
-        'level': 1,
-        'percentage': 80,
-        'growth': '+0레벨',
-        'color': NHColors.joy,
-      },
-      'emotionJourney': [
-        {
-          'phase': '시작',
-          'period': '1주일',
-          'mainEmotion': '😊',
-          'description': '새로운 저축 습관 형성의 기쁨',
-          'percentage': 80,
-          'color': NHColors.joy,
-        },
-      ],
-      'monthlyEmotionChanges': [
-        {
-          'month': '9월',
-          'joy': 80,
-          'fear': 10,
-          'sadness': 5,
-          'anger': 3,
-          'disgust': 2,
-        },
-      ],
-      'successPatterns': [
-        {'pattern': '기본 저축', 'frequency': '매일', 'effectiveness': '높음'},
-        {'pattern': '습관 형성', 'frequency': '주 3회', 'effectiveness': '중간'},
-      ],
-      'recommendations': [
-        {
-          'type': '적금상품',
-          'name': 'NH기본 적금',
-          'reason': '안정적인 저축 습관 형성',
-          'rate': '3.0%',
-        },
-      ],
-      'achievements': [
-        {'icon': '🎯', 'title': '시작', 'desc': '80% 달성'},
-        {'icon': '📈', 'title': '성장', 'desc': '기쁨이 Lv.1'},
-        {'icon': '📅', 'title': '기록', 'desc': '1일 기록'},
-        {'icon': '💰', 'title': '저축', 'desc': '기본 습관'},
-      ],
-    };
   }
 
   void _handleDownload() {

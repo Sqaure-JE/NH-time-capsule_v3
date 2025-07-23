@@ -325,12 +325,12 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                       // 타임캡슐 정원 컨테이너
                       Container(
                         height: capsules.isEmpty
-                            ? 500
+                            ? 350
                             : math.max(
-                                500,
-                                380 +
+                                350, // 하늘과 흙 공간을 위한 충분한 높이
+                                320 +
                                     ((capsules.length + 1) ~/ 3 + 1) *
-                                        140), // 제목과 진행률이 완전히 보이도록 높이 증가
+                                        120), // 행별 충분한 간격 확보
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -384,21 +384,21 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                               ),
                             ),
 
-                            // 흙 배경 (비율을 훨씬 더 높게 조정)
+                            // 세련된 흙 배경 (하늘 공간을 넓게 확보)
                             Positioned(
                               bottom: 0,
+                              top: 120, // 상단 120px는 하늘 공간으로 확보
                               left: 0,
                               right: 0,
                               child: Container(
-                                height: 280, // 흙 높이 적절히 조정
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      const Color(0xFF90EE90), // 잔디색
-                                      const Color(0xFFD2691E), // 갈색
-                                      const Color(0xFF8B4513), // 어두운 갈색
+                                      const Color(0xFFAED581), // 연한 초록색 (잔디)
+                                      const Color(0xFFA1887F), // 부드러운 갈색
+                                      const Color(0xFF8D6E63), // 진한 갈색
                                     ],
                                   ),
                                   borderRadius: const BorderRadius.only(
@@ -408,19 +408,20 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 ),
                                 child: Stack(
                                   children: [
-                                    // 잔디 효과
+                                    // 세련된 잔디 효과
                                     Positioned(
                                       top: 0,
                                       left: 0,
                                       right: 0,
-                                      height: 30,
+                                      height: 15,
                                       child: Container(
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             begin: Alignment.topCenter,
                                             end: Alignment.bottomCenter,
                                             colors: [
-                                              const Color(0xFF228B22),
+                                              const Color(0xFF4CAF50)
+                                                  .withOpacity(0.8),
                                               Colors.transparent,
                                             ],
                                           ),
@@ -429,21 +430,17 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceAround,
                                           children: List.generate(
-                                            15,
+                                            12,
                                             (index) => Container(
-                                              width: 2,
-                                              height: 22,
+                                              width: 1.5,
+                                              height: 12,
                                               margin:
-                                                  const EdgeInsets.only(top: 4),
+                                                  const EdgeInsets.only(top: 2),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFF228B22)
-                                                    .withOpacity(0.7),
+                                                color: const Color(0xFF4CAF50)
+                                                    .withOpacity(0.6),
                                                 borderRadius:
                                                     BorderRadius.circular(1),
-                                              ),
-                                              transform: Matrix4.rotationZ(
-                                                (index.isEven ? 0.2 : -0.2) *
-                                                    (index % 3),
                                               ),
                                             ),
                                           ),
@@ -466,30 +463,43 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 final row = index ~/ 3;
                                 final col = index % 3;
 
-                                // 컨테이너 너비에서 캡슐들을 균등하게 배치
+                                // 캡슐들을 적당한 간격으로 균등 배치
                                 final containerWidth =
-                                    MediaQuery.of(context).size.width -
-                                        32; // 좌우 패딩 16씩
-                                final capsuleWidth = 72.0; // 원래 크기로 복원
+                                    MediaQuery.of(context).size.width - 20;
+                                final capsuleWidth = 100.0;
                                 final availableWidth =
                                     containerWidth - (3 * capsuleWidth);
                                 final spacing =
-                                    availableWidth / 4; // 양쪽 여백 + 중간 간격 2개
+                                    availableWidth / 3; // 적당한 간격으로 조정
 
-                                final left = 16 +
-                                    spacing +
-                                    (col * (capsuleWidth + spacing));
+                                final left =
+                                    10 + (col * (capsuleWidth + spacing));
 
-                                // 진행률에 따른 정확한 위치 계산
-                                final baseTop = 280.0 +
-                                    (row * 140); // 흙 표면 기준점 (흙 높이 280에 맞춰 조정)
-                                final capsuleHeight = 90.0; // 캡슐 높이
-                                final top = progress >= 1.0
-                                    ? baseTop - 200 // 100% 완성시 하늘로 완전히 올림
-                                    : baseTop +
-                                        50 -
-                                        (progress *
-                                            80); // 0%는 땅에 묻혀있고, 진행률에 따라 점진적으로 나옴
+                                // 🌱 진행률별 정확한 배치 + 완전 겹침 방지
+                                final soilSurface = 120.0; // 흙 표면
+                                final colOffset =
+                                    col * 25; // 열별 높이 차이를 크게 늘려서 절대 겹치지 않게
+
+                                double top;
+                                if (progress >= 1.0) {
+                                  // 🎉 완성된 캡슐들: 같은 높이로 하늘에 배치
+                                  top = 10 + (col * 8); // 완성 캡슐들을 거의 같은 높이로
+                                } else if (progress >= 0.85) {
+                                  // 다낭여행(90%) - 거의 완성, 지표면 바로 위로 솟아남
+                                  top = soilSurface - 30 + colOffset;
+                                } else if (progress >= 0.75) {
+                                  // 결혼기념일(83%) - 지표면 근처
+                                  top = soilSurface + 20 + colOffset;
+                                } else if (progress >= 0.65) {
+                                  // 러닝(70%) - 지표면 조금 아래
+                                  top = soilSurface + 70 + colOffset;
+                                } else if (progress >= 0.4) {
+                                  // 독서습관(45%) - 흙 속 중간 (내집마련보다 위)
+                                  top = soilSurface + 120 + colOffset;
+                                } else {
+                                  // 내집마련(30%) - 흙 속 가장 깊이
+                                  top = soilSurface + 170 + colOffset;
+                                }
 
                                 return Positioned(
                                   left: left,
@@ -502,11 +512,11 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 );
                               }).toList(),
 
-                              // 무기한 타임캡슐 추가 (제일 아래 흙 부분)
+                              // 무기한 타임캡슐 추가 (정원 중앙 하단 흙 부분)
                               Positioned(
-                                bottom: 40,
-                                left: MediaQuery.of(context).size.width / 2 -
-                                    32, // 원래 크기로 복원
+                                top: 250, // 다른 캡슐들과 겹치지 않게 충분히 아래
+                                left:
+                                    MediaQuery.of(context).size.width / 2 - 42,
                                 child: GestureDetector(
                                   onTap: () {
                                     Navigator.push(
@@ -902,19 +912,29 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     );
   }
 
-  // 알 모양 타임캡슐 위젯 (단순화)
+  // 🌱 성장하는 타임캡슐 위젯 (스토리텔링 강화)
   Widget _buildEggCapsule(TimeCapsule capsule, double progress) {
     final isCompleted = progress >= 1.0;
     final categoryIcon = _getCategoryIcon(capsule.category);
 
+    // 성장 단계별 시각적 효과
+    final growthStage = progress >= 1.0
+        ? 'completed'
+        : progress >= 0.7
+            ? 'blooming'
+            : progress >= 0.4
+                ? 'growing'
+                : 'seed';
+
     return Stack(
       alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
-        // 완성된 캡슐의 간단한 효과 (원래 크기로 복원)
+        // 완성된 캡슐의 특별한 오라 효과
         if (isCompleted)
           Container(
-            width: 100,
-            height: 120,
+            width: 80,
+            height: 100,
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 colors: [
@@ -923,54 +943,65 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                   Colors.transparent,
                 ],
               ),
-              borderRadius: BorderRadius.circular(60), // 원래 크기로 복원
+              borderRadius: BorderRadius.circular(50),
             ),
           ),
 
-        // 알 모양 본체 (원래 크기로 복원)
+        // 메인 캡슐 컨테이너
         Container(
-          width: 72,
-          height: 90,
+          width: 64,
+          height: 80,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: isCompleted
                   ? [
-                      Colors.yellow.shade200,
-                      Colors.yellow.shade400,
-                      Colors.yellow.shade600,
+                      const Color(0xFFFFF9C4),
+                      const Color(0xFFFFEB3B),
+                      const Color(0xFFFFC107),
                     ]
-                  : progress > 0.5
+                  : progress >= 0.7
                       ? [
                           Colors.white,
-                          NHColors.blue.withOpacity(0.3),
-                          NHColors.blue.withOpacity(0.5),
+                          const Color(0xFFE8F5E8),
+                          const Color(0xFF81C784),
                         ]
-                      : [
-                          Colors.white,
-                          NHColors.gray100,
-                          NHColors.gray300,
-                        ],
+                      : progress >= 0.4
+                          ? [
+                              Colors.white,
+                              const Color(0xFFE3F2FD),
+                              const Color(0xFFBBDEFB),
+                            ]
+                          : [
+                              const Color(0xFFFAFAFA),
+                              const Color(0xFFE0E0E0),
+                              const Color(0xFFBDBDBD),
+                            ],
             ),
-            borderRadius: BorderRadius.circular(36), // 원래 크기로 복원
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(
               color: isCompleted
-                  ? Colors.yellow.shade700
-                  : progress > 0.5
-                      ? NHColors.blue
-                      : NHColors.gray400,
-              width: isCompleted ? 4 : 3,
+                  ? const Color(0xFFF57F17)
+                  : progress >= 0.7
+                      ? const Color(0xFF4CAF50)
+                      : progress >= 0.4
+                          ? const Color(0xFF1976D2)
+                          : const Color(0xFF9E9E9E),
+              width: isCompleted ? 3 : 2.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: isCompleted
-                    ? Colors.yellow.withOpacity(0.6)
-                    : progress > 0.5
-                        ? NHColors.blue.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.15),
-                blurRadius: isCompleted ? 20 : 12,
+                    ? Colors.amber.withOpacity(0.5)
+                    : progress >= 0.7
+                        ? Colors.green.withOpacity(0.3)
+                        : progress >= 0.4
+                            ? Colors.blue.withOpacity(0.3)
+                            : Colors.grey.withOpacity(0.2),
+                blurRadius: isCompleted ? 16 : 12,
                 offset: const Offset(0, 6),
+                spreadRadius: isCompleted ? 2 : 1,
               ),
             ],
           ),
@@ -978,87 +1009,117 @@ class _NHHomeScreenState extends State<NHHomeScreen>
             child: Text(
               categoryIcon,
               style: TextStyle(
-                fontSize: isCompleted ? 36 : 32, // 원래 크기로 복원
+                fontSize: isCompleted
+                    ? 28
+                    : progress >= 0.4
+                        ? 24
+                        : 20,
+                shadows: isCompleted
+                    ? [
+                        Shadow(
+                          color: Colors.orange.withOpacity(0.6),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
             ),
           ),
         ),
 
-        // 진행률 표시 (잘리지 않도록 위치 조정)
+        // 진행률 표시 (모든 캡슐에 표시)
         Positioned(
-          bottom: -30, // 더 아래로 이동하여 완전히 보이게 함
+          bottom: -20,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isCompleted
-                    ? [
-                        Colors.yellow.shade100,
-                        Colors.yellow.shade200,
-                      ]
-                    : [
-                        Colors.white,
-                        NHColors.blue.withOpacity(0.1),
-                      ],
-              ),
-              borderRadius: BorderRadius.circular(22),
+              color: isCompleted
+                  ? const Color(0xFFFFF59D)
+                  : progress >= 0.7
+                      ? const Color(0xFFE8F5E8)
+                      : progress >= 0.4
+                          ? const Color(0xFFE3F2FD)
+                          : Colors.white,
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: isCompleted ? Colors.yellow.shade600 : NHColors.blue,
-                width: 3,
+                color: isCompleted
+                    ? const Color(0xFFF57F17)
+                    : progress >= 0.7
+                        ? const Color(0xFF4CAF50)
+                        : progress >= 0.4
+                            ? const Color(0xFF1976D2)
+                            : const Color(0xFF9E9E9E),
+                width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isCompleted
-                      ? Colors.yellow.withOpacity(0.5)
-                      : NHColors.blue.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: Text(
               isCompleted ? '🎉 완성!' : '${(progress * 100).toInt()}%',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isCompleted ? Colors.yellow.shade800 : NHColors.blue,
+                color: isCompleted
+                    ? const Color(0xFFF57F17)
+                    : progress >= 0.7
+                        ? const Color(0xFF2E7D32)
+                        : progress >= 0.4
+                            ? const Color(0xFF1976D2)
+                            : const Color(0xFF757575),
               ),
             ),
           ),
         ),
 
-        // 캡슐 제목 표시 (잘리지 않도록 위치 조정)
+        // 캡슐 제목 표시 (모든 캡슐에 표시)
         Positioned(
-          bottom: -70, // 더 아래로 이동하여 완전히 보이게 함
+          bottom: -50,
           child: Container(
-            width: 110, // 캡슐 크기에 맞춰 조정
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 8), // 패딩 조정
+            width: 85,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.98), // 더 불투명하게
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: NHColors.gray500, // 더 진한 테두리
-                width: 2,
+                color: isCompleted
+                    ? const Color(0xFFF57F17).withOpacity(0.3)
+                    : progress >= 0.7
+                        ? const Color(0xFF4CAF50).withOpacity(0.3)
+                        : progress >= 0.4
+                            ? const Color(0xFF1976D2).withOpacity(0.3)
+                            : const Color(0xFF9E9E9E).withOpacity(0.3),
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25), // 더 진한 그림자
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Text(
-              capsule.title.length > 10
-                  ? '${capsule.title.substring(0, 10)}...'
+              capsule.title.length > 9
+                  ? '${capsule.title.substring(0, 9)}...'
                   : capsule.title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13, // 폰트 크기 증가
-                fontWeight: FontWeight.w800, // 더 굵게
-                color: NHColors.gray900, // 더 진한 색상
-                letterSpacing: -0.2, // 글자 간격 조정
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isCompleted
+                    ? const Color(0xFFF57F17)
+                    : progress >= 0.7
+                        ? const Color(0xFF2E7D32)
+                        : progress >= 0.4
+                            ? const Color(0xFF1976D2)
+                            : const Color(0xFF757575),
+                height: 1.2,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1069,71 +1130,135 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     );
   }
 
-  // 무기한 타임캡슐 위젯
+  // ♾️ 무기한 타임캡슐 위젯 (성장 스타일과 통일)
   Widget _buildInfiniteCapsule() {
     return Stack(
       alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
+        // 특별한 오라 효과
         Container(
-          width: 64, // 원래 크기로 복원
+          width: 80,
+          height: 100,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              colors: [
+                Colors.green.withOpacity(0.3),
+                Colors.teal.withOpacity(0.15),
+                Colors.transparent,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
+
+        // 메인 캡슐 컨테이너
+        Container(
+          width: 64,
           height: 80,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                NHColors.primary.withOpacity(0.3),
-                NHColors.primary.withOpacity(0.6),
-                NHColors.primary,
+                Color(0xFFE8F5E8),
+                Color(0xFF4CAF50),
+                Color(0xFF2E7D32),
               ],
             ),
-            borderRadius: BorderRadius.circular(32), // 원래 크기로 복원
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: NHColors.primary,
+              color: const Color(0xFF1B5E20),
               width: 3,
             ),
             boxShadow: [
               BoxShadow(
-                color: NHColors.primary.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.green.withOpacity(0.5),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+                spreadRadius: 2,
               ),
             ],
           ),
-          child: Center(
+          child: const Center(
             child: Text(
               '∞',
               style: TextStyle(
-                fontSize: 32, // 원래 크기로 복원
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Color(0xFF1B5E20),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
             ),
           ),
         ),
 
-        // 무기한 라벨
+        // 무제한 표시
         Positioned(
-          bottom: -16,
+          bottom: -20,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: NHColors.primary,
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFE8F5E8),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: const Color(0xFF2E7D32),
+                width: 2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: const Text(
+              '♾️ 무제한',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1B5E20),
+              ),
+            ),
+          ),
+        ),
+
+        // 제목 표시
+        Positioned(
+          bottom: -50,
+          child: Container(
+            width: 85,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF4CAF50).withOpacity(0.3),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Text(
-              '무기한',
+            child: const Text(
+              '금융일기',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2E7D32),
+                height: 1.2,
               ),
             ),
           ),

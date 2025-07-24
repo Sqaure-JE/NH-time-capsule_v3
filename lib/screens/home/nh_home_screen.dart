@@ -322,15 +322,15 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                       ),
                       const SizedBox(height: 16),
 
-                      // 타임캡슐 정원 컨테이너
+                      // 타임캡슐 정원 컨테이너 (아래쪽 확장)
                       Container(
                         height: capsules.isEmpty
-                            ? 350
+                            ? 480
                             : math.max(
-                                350, // 하늘과 흙 공간을 위한 충분한 높이
-                                320 +
+                                480, // 아래쪽 캡슐들을 위해 높이 확장 (420 → 480)
+                                400 +
                                     ((capsules.length + 1) ~/ 3 + 1) *
-                                        120), // 행별 충분한 간격 확보
+                                        160), // 행별 간격 조정 (360 → 400, 140 → 160)
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -384,10 +384,11 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                               ),
                             ),
 
-                            // 세련된 흙 배경 (하늘 공간을 넓게 확보)
+                            // 세련된 흙 배경 (하늘 공간 적절히 조정)
                             Positioned(
                               bottom: 0,
-                              top: 120, // 상단 120px는 하늘 공간으로 확보
+                              top:
+                                  170, // 상단 170px는 하늘 공간으로 확보 (200 → 170, 컨테이너 축소)
                               left: 0,
                               right: 0,
                               child: Container(
@@ -447,6 +448,228 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                         ),
                                       ),
                                     ),
+
+                                    // 💎 프리미엄 흙속 보물들 (배경으로)
+
+                                    // 🏅 금괴 1 - 왼쪽 상단
+                                    Positioned(
+                                      top: 30,
+                                      left: 25,
+                                      child: Container(
+                                        width: 20,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFD700),
+                                              Color(0xFFFFA500),
+                                              Color(0xFFFFD700),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.amber.withOpacity(0.4),
+                                              blurRadius: 4,
+                                              offset: Offset(1, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            width: 16,
+                                            height: 2,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFB8860B)
+                                                  .withOpacity(0.6),
+                                              borderRadius:
+                                                  BorderRadius.circular(1),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 💎 다이아몬드 - 중앙 상단
+                                    Positioned(
+                                      top: 25,
+                                      left: 170,
+                                      child: Container(
+                                        width: 16,
+                                        height: 16,
+                                        decoration: BoxDecoration(
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              Colors.white.withOpacity(0.9),
+                                              Colors.blue.withOpacity(0.3),
+                                              Colors.white.withOpacity(0.7),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(3),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.blue.withOpacity(0.2),
+                                              blurRadius: 4,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 🏅 금괴 2 - 오른쪽 상단
+                                    Positioned(
+                                      top: 40,
+                                      right: 30,
+                                      child: Container(
+                                        width: 18,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFD700),
+                                              Color(0xFFFFA500),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.amber.withOpacity(0.3),
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 💚 에메랄드 - 왼쪽 중앙
+                                    Positioned(
+                                      top: 70,
+                                      left: 50,
+                                      child: Container(
+                                        width: 14,
+                                        height: 14,
+                                        decoration: BoxDecoration(
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              Color(0xFF50C878),
+                                              Color(0xFF228B22),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.green.withOpacity(0.4),
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 🏅 작은 금괴 - 중앙
+                                    Positioned(
+                                      top: 90,
+                                      left: 140,
+                                      child: Container(
+                                        width: 14,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFDAA520)
+                                              .withOpacity(0.7),
+                                          borderRadius:
+                                              BorderRadius.circular(1),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 🔵 사파이어 - 오른쪽 중앙
+                                    Positioned(
+                                      top: 80,
+                                      right: 50,
+                                      child: Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              Color(0xFF0F52BA),
+                                              Color(0xFF082567),
+                                            ],
+                                          ),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.blue.withOpacity(0.4),
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 🏅 금괴 3 - 왼쪽 하단
+                                    Positioned(
+                                      bottom: 70,
+                                      left: 80,
+                                      child: Container(
+                                        width: 16,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFD700),
+                                              Color(0xFFB8860B),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // 💎 작은 보석들
+                                    Positioned(
+                                      bottom: 50,
+                                      left: 200,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFDC143C)
+                                              .withOpacity(0.6),
+                                          borderRadius:
+                                              BorderRadius.circular(1),
+                                        ),
+                                      ),
+                                    ),
+
+                                    Positioned(
+                                      bottom: 90,
+                                      right: 80,
+                                      child: Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              Color(0xFF9966CC),
+                                              Color(0xFF663399),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -475,30 +698,32 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 final left =
                                     10 + (col * (capsuleWidth + spacing));
 
-                                // 🌱 진행률별 정확한 배치 + 완전 겹침 방지
-                                final soilSurface = 120.0; // 흙 표면
+                                // 🌱 진행률 순서별 정확한 배치 + 완전 겹침 방지
+                                final soilSurface = 170.0; // 흙 표면
+
+                                // 열별 미세 조정 (겹침 방지용)
                                 final colOffset =
-                                    col * 25; // 열별 높이 차이를 크게 늘려서 절대 겹치지 않게
+                                    col * 15.0; // 작은 값으로 조정하여 순서 유지
 
                                 double top;
                                 if (progress >= 1.0) {
                                   // 🎉 완성된 캡슐들: 같은 높이로 하늘에 배치
-                                  top = 10 + (col * 8); // 완성 캡슐들을 거의 같은 높이로
+                                  top = 25 + colOffset;
                                 } else if (progress >= 0.85) {
-                                  // 다낭여행(90%) - 거의 완성, 지표면 바로 위로 솟아남
-                                  top = soilSurface - 30 + colOffset;
+                                  // 1위: 다낭여행(90%) - 가장 위, 지표면 위로 크게 솟아남 (그대로 유지)
+                                  top = soilSurface - 70 + colOffset;
                                 } else if (progress >= 0.75) {
-                                  // 결혼기념일(83%) - 지표면 근처
-                                  top = soilSurface + 20 + colOffset;
+                                  // 2위: 결혼기념일(83%) - 더더 아래로 (지표면 훨씬 아래)
+                                  top = soilSurface + 30 + colOffset;
                                 } else if (progress >= 0.65) {
-                                  // 러닝(70%) - 지표면 조금 아래
-                                  top = soilSurface + 70 + colOffset;
+                                  // 3위: 러닝(70%) - 더더 아래로 (흙 속 깊이)
+                                  top = soilSurface + 80 + colOffset;
                                 } else if (progress >= 0.4) {
-                                  // 독서습관(45%) - 흙 속 중간 (내집마련보다 위)
-                                  top = soilSurface + 120 + colOffset;
+                                  // 4위: 독서습관(45%) - 조금 더 아래로
+                                  top = soilSurface + 140 + colOffset;
                                 } else {
-                                  // 내집마련(30%) - 흙 속 가장 깊이
-                                  top = soilSurface + 170 + colOffset;
+                                  // 5위: 내집마련(30%) & 새 캡슐(0%) - 더더욱 많이 아래로 (흙 속 매우 깊이)
+                                  top = soilSurface + 280 + colOffset;
                                 }
 
                                 return Positioned(
@@ -512,9 +737,9 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 );
                               }).toList(),
 
-                              // 무기한 타임캡슐 추가 (정원 중앙 하단 흙 부분)
+                              // 무기한 타임캡슐 추가 (6위: 가장 아래)
                               Positioned(
-                                top: 250, // 다른 캡슐들과 겹치지 않게 충분히 아래
+                                top: 470, // 6위: 무제한 - 더더욱 많이 아래로 (흙 속 최하단)
                                 left:
                                     MediaQuery.of(context).size.width / 2 - 42,
                                 child: GestureDetector(

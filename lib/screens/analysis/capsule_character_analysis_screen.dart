@@ -18,6 +18,23 @@ class _CapsuleCharacterAnalysisScreenState
   // 타임캡슐 ID에 따른 분석 데이터 반환
   Map<String, dynamic> get analysisData {
     switch (widget.capsuleId) {
+      // 홈 화면의 실제 ID에 맞춘 매칭
+      case 'sample_1': // 제주도 여행 자금
+        return _getJejuAnalysisData();
+      case 'sample_2': // 친구들과 부산여행
+        return _getBusanAnalysisData();
+      case 'sample_3': // 다낭 여행
+        return _getDanangAnalysisData();
+      case 'sample_4': // 내집마련
+        return _getHouseAnalysisData();
+      case 'sample_5': // 결혼기념일
+        return _getAnniversaryAnalysisData();
+      case 'capsule_running': // 러닝 습관
+        return _getRunningAnalysisData();
+      case 'capsule_reading': // 독서 습관
+        return _getReadingAnalysisData();
+
+      // 기존 ID들도 호환성을 위해 유지
       case 'capsule_1': // 다낭 여행 자금
         return _getDanangAnalysisData();
       case 'capsule_2': // 집 구매 자금
@@ -30,10 +47,6 @@ class _CapsuleCharacterAnalysisScreenState
         return _getAnniversaryAnalysisData();
       case 'capsule_9': // 부산 여행 자금 (완료)
         return _getBusanAnalysisData();
-      case 'capsule_running': // 러닝 타임캡슐
-        return _getRunningAnalysisData();
-      case 'capsule_reading': // 독서타임캡슐
-        return _getReadingAnalysisData();
       default:
         return _getNewCapsuleAnalysisData(); // 새로운 타임캡슐 기본값
     }
@@ -42,7 +55,7 @@ class _CapsuleCharacterAnalysisScreenState
   // 다낭 여행 자금 분석 데이터
   Map<String, dynamic> _getDanangAnalysisData() {
     return {
-      'capsuleTitle': '🏖️ 다낭 여행 자금',
+      'capsuleTitle': '다낭 여행',
       'period': '5개월',
       'startDate': '2025.08.01',
       'endDate': '2025.01.06',
@@ -162,7 +175,7 @@ class _CapsuleCharacterAnalysisScreenState
   // 집 구매 자금 분석 데이터
   Map<String, dynamic> _getHouseAnalysisData() {
     return {
-      'capsuleTitle': '🏠 집 구매 자금',
+      'capsuleTitle': '내집마련',
       'period': '36개월',
       'startDate': '2022.01.01',
       'endDate': '2025.01.06',

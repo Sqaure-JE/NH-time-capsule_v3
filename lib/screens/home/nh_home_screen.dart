@@ -707,7 +707,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 // 캡슐들을 적당한 간격으로 균등 배치
                                 final containerWidth =
                                     MediaQuery.of(context).size.width - 20;
-                                final capsuleWidth = 100.0;
+                                final capsuleWidth = 67.0; // 100 * 2/3
                                 final availableWidth =
                                     containerWidth - (3 * capsuleWidth);
                                 final spacing =
@@ -1202,8 +1202,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
         // 완성된 캡슐의 특별한 오라 효과
         if (isCompleted)
           Container(
-            width: 80,
-            height: 100,
+            width: 53, // 80 * 2/3
+            height: 67, // 100 * 2/3
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 colors: [
@@ -1465,8 +1465,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
       children: [
         // 특별한 오라 효과
         Container(
-          width: 80,
-          height: 100,
+          width: 53, // 80 * 2/3
+          height: 67, // 100 * 2/3
           decoration: BoxDecoration(
             gradient: RadialGradient(
               colors: [
@@ -1511,7 +1511,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
             child: Text(
               '∞',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 19, // 28 * 2/3
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 shadows: [
@@ -1653,7 +1653,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
               child: Center(
                 child: Text(
                   icon,
-                  style: const TextStyle(fontSize: 24),
+                  style: const TextStyle(fontSize: 16), // 24 * 2/3
                 ),
               ),
             ),
@@ -1835,7 +1835,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
       ),
       child: Row(
         children: [
-          Text(coupon.icon, style: const TextStyle(fontSize: 28)),
+          Text(coupon.icon, style: const TextStyle(fontSize: 19)), // 28 * 2/3
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -2113,7 +2113,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                 child: Text(
                   icon,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 16, // 24 * 2/3
                     color: Colors.white,
                   ),
                 ),
@@ -2441,13 +2441,31 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                       ),
                     ],
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                    style: IconButton.styleFrom(
-                      backgroundColor: NHColors.gray100,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: NHColors.gray800,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      style: IconButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
                       ),
                     ),
                   ),
@@ -2550,7 +2568,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
               child: Center(
                 child: Text(
                   icon,
-                  style: const TextStyle(fontSize: 28),
+                  style: const TextStyle(fontSize: 19), // 28 * 2/3
                 ),
               ),
             ),

@@ -56,11 +56,11 @@ class AppConstants {
       'name': '저축',
       'color': 0xFF00A651,
     },
-    'home': {'id': 'home', 'icon': '🏠', 'name': '내집마련', 'color': 0xFF9B59B6},
+    'home': {'id': 'home', 'icon': '🏠', 'name': '내집', 'color': 0xFF9B59B6},
     'lifestyle': {
       'id': 'lifestyle',
       'icon': '🎯',
-      'name': '취미생활',
+      'name': '취미',
       'color': 0xFFFF9800,
     },
     'running': {
@@ -78,7 +78,7 @@ class AppConstants {
     'relationship': {
       'id': 'relationship',
       'icon': '💕',
-      'name': '특별한날',
+      'name': '기념일',
       'color': 0xFFE91E63,
     },
     'diet': {
@@ -100,19 +100,19 @@ class AppConstants {
     'lifestyle': {
       'id': 'lifestyle',
       'icon': '🎯',
-      'name': '취미생활',
+      'name': '취미',
       'color': 0xFFFF9800,
     },
     'relationship': {
       'id': 'relationship',
       'icon': '💕',
-      'name': '특별한날',
+      'name': '모임',
       'color': 0xFFE91E63,
     },
     'groupbuy': {
       'id': 'groupbuy',
       'icon': '🛒',
-      'name': '공동구매',
+      'name': '공구',
       'color': 0xFF00A651,
     },
     'anniversary': {

@@ -166,7 +166,7 @@ class _MonthlyCharacterAnalysisScreenState
         'type': '카드상품',
         'name': 'NH미미카드',
         'description': '아침을 먹는 사람들을 위한 아침 할인카드',
-        'benefit': '오전 5~9시 음식점 50% 청구할인',
+        'benefit': '오전5~9시 음식점 50%청구할인',
         'reason': '식비 절약 패턴을 보이고 있어 아침식사 할인 혜택이 도움될 것 같아요',
         'icon': '🌅',
       },
@@ -1076,6 +1076,8 @@ class _MonthlyCharacterAnalysisScreenState
                                     fontSize: 16,
                                     color: NHColors.gray800,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
                                 Container(
@@ -1131,10 +1133,12 @@ class _MonthlyCharacterAnalysisScreenState
                               child: Text(
                                 recommendation['benefit'],
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: NHColors.orange,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                         ],

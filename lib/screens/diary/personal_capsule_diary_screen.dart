@@ -21,6 +21,9 @@ class _PersonalCapsuleDiaryScreenState
   String amount = '';
   String content = '';
   File? selectedImage;
+  File? selectedVideo;
+  String? audioPath;
+  bool isRecording = false;
   String milestone = '';
   final TextEditingController _diaryController = TextEditingController();
 
@@ -140,6 +143,8 @@ class _PersonalCapsuleDiaryScreenState
 
   int get basePoints => 50;
   int get imagePoints => selectedImage != null ? 20 : 0;
+  int get videoPoints => selectedVideo != null ? 25 : 0;
+  int get audioPoints => audioPath != null ? 15 : 0;
   int get milestonePoints => milestones.firstWhere(
         (m) => m['id'] == milestone,
         orElse: () => {'bonus': 0},
@@ -150,7 +155,12 @@ class _PersonalCapsuleDiaryScreenState
       ? 15
       : 0;
   int get totalPoints =>
-      basePoints + imagePoints + milestonePoints + amountPoints;
+      basePoints +
+      imagePoints +
+      videoPoints +
+      audioPoints +
+      milestonePoints +
+      amountPoints;
   int get characterExp => (totalPoints / 2).floor();
 
   @override
@@ -737,58 +747,79 @@ class _PersonalCapsuleDiaryScreenState
               color: NHColors.gray800,
             ),
           ),
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: selectedImage != null
-                      ? NHColors.primary
-                      : NHColors.gray300,
-                  width: 2,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: selectedImage != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        selectedImage!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    )
-                  : const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt,
-                          size: 28,
-                          color: NHColors.gray400,
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          '목표 관련 사진 추가',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: NHColors.gray500,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '+20P • 캐릭터 성장 보너스',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: NHColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 4),
+          const Text(
+            '사진, 동영상, 음성으로 목표 달성 과정을 기록하세요',
+            style: TextStyle(
+              fontSize: 12,
+              color: NHColors.gray500,
             ),
           ),
+          const SizedBox(height: 12),
+
+          // 버튼들
+          Row(
+            children: [
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.photo_library,
+                  label: '갤러리',
+                  subtitle: '+20P',
+                  onTap: _pickImageFromGallery,
+                  isSelected: selectedImage != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.camera_alt,
+                  label: '사진촬영',
+                  subtitle: '+20P',
+                  onTap: _takePhoto,
+                  isSelected: false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.videocam,
+                  label: '동영상',
+                  subtitle: '+25P',
+                  onTap: _takeVideo,
+                  isSelected: selectedVideo != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: isRecording ? Icons.stop : Icons.mic,
+                  label: isRecording ? '녹음중' : '음성녹음',
+                  subtitle: '+15P',
+                  onTap: isRecording ? _stopRecording : _startRecording,
+                  isSelected: audioPath != null,
+                  isRecording: isRecording,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // 미디어 미리보기
+          if (selectedImage != null ||
+              selectedVideo != null ||
+              audioPath != null)
+            Container(
+              height: 90,
+              decoration: BoxDecoration(
+                border: Border.all(color: NHColors.primary, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _buildMediaPreview(),
+              ),
+            ),
         ],
       ),
     );
@@ -894,6 +925,16 @@ class _PersonalCapsuleDiaryScreenState
           if (imagePoints > 0)
             const Text(
               '• 추억 사진 추가 +20P',
+              style: TextStyle(fontSize: 12, color: NHColors.gray800),
+            ),
+          if (videoPoints > 0)
+            const Text(
+              '• 동영상 추가 +25P',
+              style: TextStyle(fontSize: 12, color: NHColors.gray800),
+            ),
+          if (audioPoints > 0)
+            const Text(
+              '• 음성녹음 추가 +15P',
               style: TextStyle(fontSize: 12, color: NHColors.gray800),
             ),
           if (milestonePoints > 0)
@@ -1018,14 +1059,257 @@ class _PersonalCapsuleDiaryScreenState
     );
   }
 
-  Future<void> _pickImage() async {
+  Widget _buildMediaButton({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isSelected,
+    bool isRecording = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? NHColors.primary.withOpacity(0.1)
+              : isRecording
+                  ? NHColors.anger.withOpacity(0.1)
+                  : NHColors.gray50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? NHColors.primary
+                : isRecording
+                    ? NHColors.anger
+                    : NHColors.gray200,
+            width: isSelected || isRecording ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected
+                  ? NHColors.primary
+                  : isRecording
+                      ? NHColors.anger
+                      : NHColors.gray500,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray600,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 8,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaPreview() {
+    if (selectedImage != null) {
+      return Stack(
+        children: [
+          Image.file(
+            selectedImage!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedImage = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (selectedVideo != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.play_circle_outline,
+                    size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('동영상 준비됨', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedVideo = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (audioPath != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.audiotrack, size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('음성 녹음 완료', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  audioPath = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Container();
+  }
+
+  Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         selectedImage = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
       });
     }
+  }
+
+  Future<void> _takePhoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        selectedImage = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _takeVideo() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? video = await picker.pickVideo(source: ImageSource.camera);
+    if (video != null) {
+      setState(() {
+        selectedVideo = File(video.path);
+        selectedImage = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _startRecording() async {
+    setState(() {
+      isRecording = true;
+    });
+
+    // 시뮬레이션: 3초 후 자동 종료
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (isRecording) {
+      _stopRecording();
+    }
+  }
+
+  void _stopRecording() {
+    setState(() {
+      isRecording = false;
+      audioPath = 'recorded_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('음성 녹음이 완료되었습니다! 🎤'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // 기존 _pickImage 메서드 제거를 위한 더미 메서드
+  Future<void> _pickImage() async {
+    _pickImageFromGallery();
   }
 
   String _formatNumber(dynamic value) {

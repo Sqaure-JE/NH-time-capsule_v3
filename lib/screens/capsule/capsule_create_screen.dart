@@ -27,10 +27,13 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
   String selectedPeriod = '';
   String firstMessage = '';
   File? selectedImage;
+  File? selectedVideo;
+  String? audioPath;
+  bool isRecording = false;
   String customCategory = '';
 
   // 멤버 선택 관련
-  final List<String> allMembers = ['박수빈', '이정은', '최민수'];
+  final List<String> allMembers = ['이정은', '김혜진', '김수름', '한지혜'];
   List<String> selectedMembers = ['김올리']; // 김올리는 기본으로 포함
 
   // 유효성 검사
@@ -317,7 +320,7 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
               crossAxisCount: 3,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.2,
+              childAspectRatio: 2.0, // 1.2 → 2.0으로 증가하여 버튼 높이를 낮춤
             ),
             itemCount: categories.length,
             itemBuilder: (context, index) {
@@ -804,68 +807,87 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '사진 추가 (선택)',
+            '📸 첫 추억 기록 (선택)',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: NHColors.gray800,
             ),
           ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              height: 120,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: selectedImage != null
-                      ? NHColors.primary
-                      : NHColors.gray300,
-                  width: 2,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              ),
-              child: selectedImage != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.borderRadius,
-                      ),
-                      child: Image.file(
-                        selectedImage!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt,
-                          size: 32,
-                          color: NHColors.gray400,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '첫 추억 사진 추가',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: NHColors.gray500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          '+20P 추가 적립',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: NHColors.gray400,
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 4),
+          const Text(
+            '사진, 동영상, 음성으로 타임캡슐의 첫 순간을 기록하세요',
+            style: TextStyle(
+              fontSize: 12,
+              color: NHColors.gray500,
             ),
           ),
+          const SizedBox(height: 16),
+
+          // 버튼들
+          Row(
+            children: [
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.photo_library,
+                  label: '갤러리',
+                  subtitle: '+20P',
+                  onTap: _pickImageFromGallery,
+                  isSelected: selectedImage != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.camera_alt,
+                  label: '사진촬영',
+                  subtitle: '+20P',
+                  onTap: _takePhoto,
+                  isSelected: false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.videocam,
+                  label: '동영상',
+                  subtitle: '+25P',
+                  onTap: _takeVideo,
+                  isSelected: selectedVideo != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: isRecording ? Icons.stop : Icons.mic,
+                  label: isRecording ? '녹음중' : '음성녹음',
+                  subtitle: '+15P',
+                  onTap: isRecording ? _stopRecording : _startRecording,
+                  isSelected: audioPath != null,
+                  isRecording: isRecording,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // 미디어 미리보기
+          if (selectedImage != null ||
+              selectedVideo != null ||
+              audioPath != null)
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                border: Border.all(color: NHColors.primary, width: 2),
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              ),
+              child: ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadius - 2),
+                child: _buildMediaPreview(),
+              ),
+            ),
         ],
       ),
     );
@@ -1025,7 +1047,7 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
       builder: (context) => AlertDialog(
         title: const Text('🎉 타임캡슐 생성 완료!'),
         content: Text(
-          '${capsule.title} 타임캡슐이 생성되었습니다!\n${capsule.isUnlimitedPeriod ? '무제한 기간' : capsule.durationInMonths.toString() + '개월'} 타임캡슐로 설정되었어요!\n기본 100P + 첫 기록 50P 적립!',
+          '${capsule.title} 타임캡슐이 생성되었습니다!\n${capsule.isUnlimitedPeriod ? '무제한 기간' : capsule.durationInMonths.toString() + '개월'} 타임캡슐로 설정되었어요!\n기본 100P + 첫 기록 50P${_getMediaBonusText()} 적립!',
         ),
         actions: [
           TextButton(
@@ -1040,12 +1062,267 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
     );
   }
 
-  Future<void> _pickImage() async {
+  Widget _buildMediaButton({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isSelected,
+    bool isRecording = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? NHColors.primary.withOpacity(0.1)
+              : isRecording
+                  ? NHColors.anger.withOpacity(0.1)
+                  : NHColors.gray50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? NHColors.primary
+                : isRecording
+                    ? NHColors.anger
+                    : NHColors.gray200,
+            width: isSelected || isRecording ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected
+                  ? NHColors.primary
+                  : isRecording
+                      ? NHColors.anger
+                      : NHColors.gray500,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray600,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 8,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaPreview() {
+    if (selectedImage != null) {
+      return Stack(
+        children: [
+          Image.file(
+            selectedImage!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedImage = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (selectedVideo != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.play_circle_outline,
+                    size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('동영상 준비됨', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedVideo = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (audioPath != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.audiotrack, size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('음성 녹음 완료', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  audioPath = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Container();
+  }
+
+  Future<void> _pickImageFromGallery() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         selectedImage = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
       });
     }
+  }
+
+  Future<void> _takePhoto() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        selectedImage = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _takeVideo() async {
+    final XFile? video = await _picker.pickVideo(source: ImageSource.camera);
+    if (video != null) {
+      setState(() {
+        selectedVideo = File(video.path);
+        selectedImage = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _startRecording() async {
+    setState(() {
+      isRecording = true;
+    });
+
+    // 시뮬레이션: 3초 후 자동 종료
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (isRecording) {
+      _stopRecording();
+    }
+  }
+
+  void _stopRecording() {
+    setState(() {
+      isRecording = false;
+      audioPath = 'recorded_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('음성 녹음이 완료되었습니다! 🎤'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _getMediaBonusText() {
+    String bonus = '';
+    if (selectedImage != null) {
+      bonus += ' + 사진 20P';
+    }
+    if (selectedVideo != null) {
+      bonus += ' + 동영상 25P';
+    }
+    if (audioPath != null) {
+      bonus += ' + 음성 15P';
+    }
+    return bonus;
+  }
+
+  // 기존 _pickImage 메서드 제거를 위한 더미 메서드
+  Future<void> _pickImage() async {
+    _pickImageFromGallery();
   }
 }

@@ -322,15 +322,15 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                       ),
                       const SizedBox(height: 16),
 
-                      // 타임캡슐 정원 컨테이너 (아래쪽 확장)
+                      // 타임캡슐 정원 컨테이너 (하늘 1/3, 흙 2/3 비율로 단축)
                       Container(
                         height: capsules.isEmpty
-                            ? 480
+                            ? 350
                             : math.max(
-                                480, // 아래쪽 캡슐들을 위해 높이 확장 (420 → 480)
-                                400 +
+                                350, // 컨테이너 높이를 350으로 조정
+                                300 +
                                     ((capsules.length + 1) ~/ 3 + 1) *
-                                        160), // 행별 간격 조정 (360 → 400, 140 → 160)
+                                        100), // 행별 간격 조정
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -351,44 +351,62 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                         ),
                         child: Stack(
                           children: [
-                            // 배경 장식들
+                            // 배경 장식들 (☀️ 해와 햇살)
                             Positioned(
-                              top: 16,
-                              left: 16,
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: Colors.yellow.withOpacity(0.6),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.yellow.withOpacity(0.3),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
+                              top: 12,
+                              right: 16,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          Color(0xFFFFFDE7),
+                                          Color(0xFFFFF59D),
+                                          Color(0xFFFFF176),
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 32,
-                              right: 32,
-                              child: Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.5),
-                                  shape: BoxShape.circle,
-                                ),
+                                  ),
+                                  // 햇살 (간단한 빛 표현)
+                                  ...List.generate(8, (i) {
+                                    final double angle =
+                                        (i * 45) * 3.14159 / 180.0;
+                                    return Transform.translate(
+                                      offset: Offset(
+                                        42 * math.cos(angle),
+                                        42 * math.sin(angle),
+                                      ),
+                                      child: Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFF59D)
+                                              .withOpacity(0.8),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFFFF176)
+                                                  .withOpacity(0.6),
+                                              blurRadius: 8,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  })
+                                ],
                               ),
                             ),
 
-                            // 세련된 흙 배경 (하늘 공간 적절히 조정)
+                            // 세련된 흙 배경 (하늘 비중 확대)
                             Positioned(
                               bottom: 0,
-                              top:
-                                  170, // 상단 170px는 하늘 공간으로 확보 (200 → 170, 컨테이너 축소)
+                              top: 150, // 상단 150px는 하늘 공간 (하늘 비중 확대), 나머지는 흙
                               left: 0,
                               right: 0,
                               child: Container(
@@ -695,35 +713,52 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 final spacing =
                                     availableWidth / 3; // 적당한 간격으로 조정
 
-                                final left =
-                                    10 + (col * (capsuleWidth + spacing));
+                                // 🌱 진행률 기반 정확한 위치 배치 시스템 (완전 재설계)
+                                final soilSurface = 150.0; // 흙 표면
+                                final screenWidth =
+                                    MediaQuery.of(context).size.width;
 
-                                // 🌱 진행률 순서별 정확한 배치 + 완전 겹침 방지
-                                final soilSurface = 170.0; // 흙 표면
-
-                                // 열별 미세 조정 (겹침 방지용)
-                                final colOffset =
-                                    col * 15.0; // 작은 값으로 조정하여 순서 유지
-
+                                // 진행률별 정확한 위치 매핑 (올바른 ID 사용)
                                 double top;
+                                double left;
+
                                 if (progress >= 1.0) {
-                                  // 🎉 완성된 캡슐들: 같은 높이로 하늘에 배치
-                                  top = 25 + colOffset;
-                                } else if (progress >= 0.85) {
-                                  // 1위: 다낭여행(90%) - 가장 위, 지표면 위로 크게 솟아남 (그대로 유지)
-                                  top = soilSurface - 70 + colOffset;
-                                } else if (progress >= 0.75) {
-                                  // 2위: 결혼기념일(83%) - 더더 아래로 (지표면 훨씬 아래)
-                                  top = soilSurface + 30 + colOffset;
-                                } else if (progress >= 0.65) {
-                                  // 3위: 러닝(70%) - 더더 아래로 (흙 속 깊이)
-                                  top = soilSurface + 80 + colOffset;
-                                } else if (progress >= 0.4) {
-                                  // 4위: 독서습관(45%) - 조금 더 아래로
-                                  top = soilSurface + 140 + colOffset;
+                                  // 🎉 완성된 캡슐들 - 하늘에 나란히 배치
+                                  top = 30;
+                                  if (capsule.id == 'sample_1') {
+                                    // 제주도 여행 (개인형 완성)
+                                    left = screenWidth * 0.2;
+                                  } else if (capsule.id == 'sample_2') {
+                                    // 부산여행 (그룹형 완성)
+                                    left = screenWidth * 0.4;
+                                  } else {
+                                    // 기타 완성 캡슐
+                                    left = screenWidth * 0.45;
+                                  }
+                                } else if (capsule.id == 'sample_3') {
+                                  // 🥇 1위: 다낭여행 (90%) - 지표면 바로 위, 가장 높은 위치
+                                  top = soilSurface - 40;
+                                  left = screenWidth * 0.7; // 오른쪽
+                                } else if (capsule.id == 'sample_5') {
+                                  // 🥈 2위: 결혼기념일 (83%) - 지표면 살짝 아래
+                                  top = soilSurface + 15;
+                                  left = screenWidth * 0.10; // 왼쪽
+                                } else if (capsule.id == 'capsule_running') {
+                                  // 🥉 3위: 러닝 (70%) - 흙 속 얕은 곳
+                                  top = soilSurface + 70;
+                                  left = screenWidth * 0.45; // 중앙 오른쪽
+                                } else if (capsule.id == 'capsule_reading') {
+                                  // 4위: 독서습관 (45%) - 흙 속 중간
+                                  top = soilSurface + 125;
+                                  left = screenWidth * 0.25; // 왼쪽 중간
+                                } else if (capsule.id == 'sample_4') {
+                                  // 5위: 내집마련 (30%) - 흙 속 깊은 곳
+                                  top = soilSurface + 180;
+                                  left = screenWidth * 0.6; // 오른쪽 중간
                                 } else {
-                                  // 5위: 내집마련(30%) & 새 캡슐(0%) - 더더욱 많이 아래로 (흙 속 매우 깊이)
-                                  top = soilSurface + 280 + colOffset;
+                                  // 6위: 새 캡슐 (0%) - 가장 깊은 곳
+                                  top = soilSurface + 235;
+                                  left = screenWidth * 0.35; // 중앙 왼쪽
                                 }
 
                                 return Positioned(
@@ -739,7 +774,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
 
                               // 무기한 타임캡슐 추가 (6위: 가장 아래)
                               Positioned(
-                                top: 470, // 6위: 무제한 - 더더욱 많이 아래로 (흙 속 최하단)
+                                top: 400, // 7위: 일반 금융일기 - 컨테이너 350에 맞춰 조정
                                 left:
                                     MediaQuery.of(context).size.width / 2 - 42,
                                 child: GestureDetector(
@@ -752,7 +787,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                       ),
                                     );
                                   },
-                                  child: _buildInfiniteCapsule(),
+                                  child: _buildGeneralDiaryCapsule(),
                                 ),
                               ),
                             ] else
@@ -1137,19 +1172,28 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     );
   }
 
-  // 🌱 성장하는 타임캡슐 위젯 (스토리텔링 강화)
+  // 🌱 성장하는 타임캡슐 위젯 (모바일 최적화 + 단계 배지)
   Widget _buildEggCapsule(TimeCapsule capsule, double progress) {
     final isCompleted = progress >= 1.0;
     final categoryIcon = _getCategoryIcon(capsule.category);
 
-    // 성장 단계별 시각적 효과
-    final growthStage = progress >= 1.0
-        ? 'completed'
-        : progress >= 0.7
-            ? 'blooming'
-            : progress >= 0.4
-                ? 'growing'
-                : 'seed';
+    // 성장 단계 배지 계산 (씨앗/새싹/개화/완성)
+    final int progressPercent = (progress * 100).round();
+    String stageEmoji;
+    String stageLabel;
+    if (progressPercent >= 100) {
+      stageEmoji = '💎';
+      stageLabel = '완성 단계';
+    } else if (progressPercent >= 71) {
+      stageEmoji = '🌸';
+      stageLabel = '개화 단계';
+    } else if (progressPercent >= 31) {
+      stageEmoji = '🌱';
+      stageLabel = '새싹 단계';
+    } else {
+      stageEmoji = '🌰';
+      stageLabel = '씨앗 단계';
+    }
 
     return Stack(
       alignment: Alignment.center,
@@ -1172,19 +1216,55 @@ class _NHHomeScreenState extends State<NHHomeScreen>
             ),
           ),
 
-        // 메인 캡슐 컨테이너
+        // 단계 배지 (상단)
+        Positioned(
+          top: -28,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: NHColors.gray200, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Text(stageEmoji, style: const TextStyle(fontSize: 12)),
+                const SizedBox(width: 6),
+                Text(
+                  stageLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: NHColors.gray700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // 메인 캡슐 컨테이너 (모바일 사이즈)
         Container(
-          width: 64,
-          height: 80,
+          width: 56,
+          height: 70,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: isCompleted
                   ? [
-                      const Color(0xFFFFF9C4),
-                      const Color(0xFFFFEB3B),
-                      const Color(0xFFFFC107),
+                      const Color(0xFFFFFFFF), // 순백색 하이라이트
+                      const Color(0xFFFFD700), // 순금색
+                      const Color(0xFFFF8F00), // 진한 오렌지 골드
+                      const Color(0xFFFFD700), // 다시 순금색
+                      const Color(0xFFFFF59D), // 연한 금색 마감
                     ]
                   : progress >= 0.7
                       ? [
@@ -1215,30 +1295,52 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                           : const Color(0xFF9E9E9E),
               width: isCompleted ? 3 : 2.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: isCompleted
-                    ? Colors.amber.withOpacity(0.5)
-                    : progress >= 0.7
-                        ? Colors.green.withOpacity(0.3)
-                        : progress >= 0.4
-                            ? Colors.blue.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.2),
-                blurRadius: isCompleted ? 16 : 12,
-                offset: const Offset(0, 6),
-                spreadRadius: isCompleted ? 2 : 1,
-              ),
-            ],
+            boxShadow: isCompleted
+                ? [
+                    // 황금 반짝임 효과 - 메인 그림자
+                    BoxShadow(
+                      color: const Color(0xFFFFD700).withOpacity(0.8),
+                      blurRadius: 25,
+                      offset: const Offset(0, 8),
+                      spreadRadius: 4,
+                    ),
+                    // 황금 반짝임 효과 - 내부 글로우
+                    BoxShadow(
+                      color: const Color(0xFFFFF59D).withOpacity(0.6),
+                      blurRadius: 15,
+                      offset: const Offset(0, 4),
+                      spreadRadius: 2,
+                    ),
+                    // 황금 반짝임 효과 - 외부 오라
+                    BoxShadow(
+                      color: const Color(0xFFFF8F00).withOpacity(0.4),
+                      blurRadius: 35,
+                      offset: const Offset(0, 12),
+                      spreadRadius: 6,
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: progress >= 0.7
+                          ? Colors.green.withOpacity(0.3)
+                          : progress >= 0.4
+                              ? Colors.blue.withOpacity(0.3)
+                              : Colors.grey.withOpacity(0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                      spreadRadius: 1,
+                    ),
+                  ],
           ),
           child: Center(
             child: Text(
               categoryIcon,
               style: TextStyle(
                 fontSize: isCompleted
-                    ? 28
+                    ? 26
                     : progress >= 0.4
-                        ? 24
-                        : 20,
+                        ? 22
+                        : 18,
                 shadows: isCompleted
                     ? [
                         Shadow(
@@ -1355,8 +1457,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     );
   }
 
-  // ♾️ 무기한 타임캡슐 위젯 (성장 스타일과 통일)
-  Widget _buildInfiniteCapsule() {
+  // 📝 일반 금융일기 위젯 (성장 스타일과 통일)
+  Widget _buildGeneralDiaryCapsule() {
     return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
@@ -1424,7 +1526,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
           ),
         ),
 
-        // 무제한 표시
+        // 일반 금융일기 표시
         Positioned(
           bottom: -20,
           child: Container(
@@ -1445,7 +1547,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
               ],
             ),
             child: const Text(
-              '♾️ 무제한',
+              '📝 일반 금융일기',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -1856,7 +1958,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                   margin: const EdgeInsets.only(bottom: 16),
                   child: _buildDiaryOptionTile(
                     icon: '∞',
-                    title: '무제한 타임캡슐',
+                    title: '일반 금융일기',
                     subtitle: '기간 제한 없이 자유롭게 작성',
                     onTap: () {
                       Navigator.pop(context);

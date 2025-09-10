@@ -15,7 +15,13 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const NHTimeCapsuleApp());
 
-    // Verify that the app loads successfully.
-    expect(find.text('NH 금융 타임캡슐'), findsOneWidget);
+    // Wait for the widget to settle
+    await tester.pumpAndSettle();
+
+    // Verify that the app loads successfully and shows the main title.
+    expect(find.text('금융 타임캡슐'), findsOneWidget);
+
+    // Also verify that the app shows the subtitle
+    expect(find.text('금융과 함께하는 나만의 감정일기'), findsOneWidget);
   });
 }

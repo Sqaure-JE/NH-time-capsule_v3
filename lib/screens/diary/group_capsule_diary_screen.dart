@@ -21,6 +21,9 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
   String description = '';
   String category = '';
   File? selectedReceipt;
+  File? selectedVideo;
+  String? audioPath;
+  bool isRecording = false;
   String splitMethod = 'equal';
   List<String> selectedMembers = [];
   String diaryContent = '';
@@ -715,65 +718,86 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '영수증/증빙 사진',
+            '📸 모임 추억',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: NHColors.gray800,
             ),
           ),
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: _pickReceipt,
-            child: Container(
-              height: 90,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: selectedReceipt != null
-                      ? NHColors.primary
-                      : NHColors.gray300,
-                  width: 2,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: selectedReceipt != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        selectedReceipt!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.receipt_long,
-                          size: 28,
-                          color: NHColors.gray400,
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          '영수증/증빙 사진 추가',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: NHColors.gray500,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '+15P 추가 적립',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: NHColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 4),
+          const Text(
+            '영수증, 사진, 동영상, 음성으로 모임 활동을 기록하세요',
+            style: TextStyle(
+              fontSize: 12,
+              color: NHColors.gray500,
             ),
           ),
+          const SizedBox(height: 12),
+
+          // 버튼들
+          Row(
+            children: [
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.photo_library,
+                  label: '갤러리',
+                  subtitle: '+15P',
+                  onTap: _pickReceiptFromGallery,
+                  isSelected: selectedReceipt != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.camera_alt,
+                  label: '사진촬영',
+                  subtitle: '+15P',
+                  onTap: _takePhoto,
+                  isSelected: false,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: Icons.videocam,
+                  label: '동영상',
+                  subtitle: '+20P',
+                  onTap: _takeVideo,
+                  isSelected: selectedVideo != null,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMediaButton(
+                  icon: isRecording ? Icons.stop : Icons.mic,
+                  label: isRecording ? '녹음중' : '음성녹음',
+                  subtitle: '+10P',
+                  onTap: isRecording ? _stopRecording : _startRecording,
+                  isSelected: audioPath != null,
+                  isRecording: isRecording,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // 미디어 미리보기
+          if (selectedReceipt != null ||
+              selectedVideo != null ||
+              audioPath != null)
+            Container(
+              height: 90,
+              decoration: BoxDecoration(
+                border: Border.all(color: NHColors.primary, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _buildMediaPreview(),
+              ),
+            ),
         ],
       ),
     );
@@ -815,7 +839,7 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
                 ),
               ),
               Text(
-                '기본 25P${selectedReceipt != null ? ' + 영수증 15P' : ''}${transactionType == 'expense' ? ' + 공동지출 10P' : ''}',
+                '기본 25P${selectedReceipt != null ? ' + 사진 15P' : ''}${selectedVideo != null ? ' + 동영상 20P' : ''}${audioPath != null ? ' + 음성 10P' : ''}${transactionType == 'expense' ? ' + 공동지출 10P' : ''}',
                 style: const TextStyle(fontSize: 12, color: NHColors.gray600),
               ),
             ],
@@ -889,14 +913,257 @@ class _GroupCapsuleDiaryScreenState extends State<GroupCapsuleDiaryScreen> {
     );
   }
 
-  Future<void> _pickReceipt() async {
+  Widget _buildMediaButton({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isSelected,
+    bool isRecording = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? NHColors.primary.withOpacity(0.1)
+              : isRecording
+                  ? NHColors.anger.withOpacity(0.1)
+                  : NHColors.gray50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? NHColors.primary
+                : isRecording
+                    ? NHColors.anger
+                    : NHColors.gray200,
+            width: isSelected || isRecording ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected
+                  ? NHColors.primary
+                  : isRecording
+                      ? NHColors.anger
+                      : NHColors.gray500,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray600,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 8,
+                color: isSelected
+                    ? NHColors.primary
+                    : isRecording
+                        ? NHColors.anger
+                        : NHColors.gray400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaPreview() {
+    if (selectedReceipt != null) {
+      return Stack(
+        children: [
+          Image.file(
+            selectedReceipt!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedReceipt = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (selectedVideo != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.play_circle_outline,
+                    size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('동영상 준비됨', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedVideo = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (audioPath != null) {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            color: NHColors.gray100,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.audiotrack, size: 40, color: NHColors.primary),
+                SizedBox(height: 4),
+                Text('음성 녹음 완료', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  audioPath = null;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Container();
+  }
+
+  Future<void> _pickReceiptFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         selectedReceipt = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
       });
     }
+  }
+
+  Future<void> _takePhoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        selectedReceipt = File(image.path);
+        selectedVideo = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _takeVideo() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? video = await picker.pickVideo(source: ImageSource.camera);
+    if (video != null) {
+      setState(() {
+        selectedVideo = File(video.path);
+        selectedReceipt = null; // 하나만 선택 가능
+      });
+    }
+  }
+
+  Future<void> _startRecording() async {
+    setState(() {
+      isRecording = true;
+    });
+
+    // 시뮬레이션: 3초 후 자동 종료
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (isRecording) {
+      _stopRecording();
+    }
+  }
+
+  void _stopRecording() {
+    setState(() {
+      isRecording = false;
+      audioPath = 'recorded_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('음성 녹음이 완료되었습니다! 🎤'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // 기존 _pickReceipt 메서드 제거를 위한 더미 메서드
+  Future<void> _pickReceipt() async {
+    _pickReceiptFromGallery();
   }
 
   Widget _buildDiaryList() {

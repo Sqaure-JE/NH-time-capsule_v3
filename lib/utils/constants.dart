@@ -81,6 +81,12 @@ class AppConstants {
       'name': '특별한날',
       'color': 0xFFE91E63,
     },
+    'diet': {
+      'id': 'diet',
+      'icon': '🥗',
+      'name': '다이어트',
+      'color': 0xFF4CAF50,
+    },
     'other': {'id': 'other', 'icon': '✨', 'name': '기타', 'color': 0xFF6B7280},
   };
 

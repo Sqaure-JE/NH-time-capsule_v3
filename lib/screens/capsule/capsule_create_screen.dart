@@ -349,26 +349,31 @@ class _CapsuleCreateScreenState extends State<CapsuleCreateScreen> {
                       width: 2,
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        category['icon'] as String,
-                        style: const TextStyle(fontSize: 24),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        category['name'] as String,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected
-                              ? Color(category['color'] as int)
-                              : NHColors.gray600,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          category['icon'] as String,
+                          style: const TextStyle(fontSize: 20),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            category['name'] as String,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? Color(category['color'] as int)
+                                  : NHColors.gray700,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

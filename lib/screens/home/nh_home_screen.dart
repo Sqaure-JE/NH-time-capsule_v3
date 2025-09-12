@@ -3,15 +3,7 @@ import '../../models/user_data.dart';
 import '../../models/time_capsule.dart';
 import '../../models/emotion_character.dart';
 import '../../utils/colors.dart';
-import '../../utils/constants.dart';
-import '../../utils/date_utils.dart' as NHDateUtils;
-import '../../utils/number_formatter.dart';
-import '../../widgets/nh_header_widget.dart';
-import '../../widgets/point_display_widget.dart';
-import '../../widgets/capsule_card_widget.dart';
-import '../../widgets/progress_bar_widget.dart';
 import '../capsule/capsule_create_screen.dart';
-import '../capsule/capsule_content_screen.dart';
 import '../capsule/personal_capsule_open_screen.dart';
 import '../capsule/group_capsule_open_screen.dart';
 import '../diary/personal_capsule_diary_screen.dart';
@@ -34,7 +26,6 @@ class _NHHomeScreenState extends State<NHHomeScreen>
   late UserData userData;
   late List<TimeCapsule> capsules;
   late List<EmotionCharacter> characters;
-  int _selectedTabIndex = 2; // 0:자산, 1:소비, 2:타임캡슐, 3:즐겨찾기, 4:전체
   late AnimationController _notificationController;
   late Animation<Offset> _slideAnimation;
   Timer? _notificationTimer;
@@ -195,14 +186,6 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     ];
   }
 
-  // 캡슐 데이터 새로고침
-  void _refreshCapsuleData() {
-    setState(() {
-      // 실제 앱에서는 API 호출로 최신 데이터를 가져올 것
-      // 여기서는 기존 데이터를 유지하면서 새로 추가된 캡슐만 반영
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -287,7 +270,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                   ),
                                 ),
                                 Text(
-                                  '금융과 함께하는 나만의 감정일기',
+                                  '오늘을 담아 미래를 여는 나만의 타임캡슐',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.white.withOpacity(0.9),
@@ -476,22 +459,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                             // 타임캡슐들 (모든 캡슐 표시)
                             if (capsules.isNotEmpty) ...[
                               ...capsules.asMap().entries.map((entry) {
-                                final index = entry.key;
                                 final capsule = entry.value;
                                 final progress = capsule.progress;
-
-                                // 동적 그리드 위치 계산 (3열 그리드)
-                                final row = index ~/ 3;
-                                final col = index % 3;
-
-                                // 캡슐들을 적당한 간격으로 균등 배치
-                                final containerWidth =
-                                    MediaQuery.of(context).size.width - 20;
-                                final capsuleWidth = 67.0; // 100 * 2/3
-                                final availableWidth =
-                                    containerWidth - (3 * capsuleWidth);
-                                final spacing =
-                                    availableWidth / 3; // 적당한 간격으로 조정
 
                                 // 🌱 진행률 기반 정확한 위치 배치 시스템 (완전 재설계)
                                 final soilSurface = 150.0; // 흙 표면
@@ -958,24 +927,6 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     final isCompleted = progress >= 1.0;
     final categoryIcon = _getCategoryIcon(capsule.category);
 
-    // 성장 단계 배지 계산 (씨앗/새싹/개화/완성)
-    final int progressPercent = (progress * 100).round();
-    String stageEmoji;
-    String stageLabel;
-    if (progressPercent >= 100) {
-      stageEmoji = '💎';
-      stageLabel = '완성 단계';
-    } else if (progressPercent >= 71) {
-      stageEmoji = '🌸';
-      stageLabel = '개화 단계';
-    } else if (progressPercent >= 31) {
-      stageEmoji = '🌱';
-      stageLabel = '새싹 단계';
-    } else {
-      stageEmoji = '🌰';
-      stageLabel = '씨앗 단계';
-    }
-
     return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
@@ -996,40 +947,6 @@ class _NHHomeScreenState extends State<NHHomeScreen>
               borderRadius: BorderRadius.circular(50),
             ),
           ),
-
-        // 단계 배지 (상단)
-        Positioned(
-          top: -28,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: NHColors.gray200, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Text(stageEmoji, style: const TextStyle(fontSize: 12)),
-                const SizedBox(width: 6),
-                Text(
-                  stageLabel,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: NHColors.gray700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
 
         // 메인 캡슐 컨테이너 (모바일 사이즈)
         Container(
@@ -1334,30 +1251,6 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1B5E20),
               ),
-            ),
-          ),
-        ),
-
-        // 제목 표시
-        Positioned(
-          bottom: -50,
-          child: Container(
-            width: 85,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFF4CAF50).withOpacity(0.3),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
           ),
         ),

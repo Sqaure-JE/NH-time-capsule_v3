@@ -224,21 +224,13 @@ class _NHHomeScreenState extends State<NHHomeScreen>
           // 메인 콘텐츠
           Column(
             children: [
-              // 헤더
+              // 헤더 (흰 바탕)
               Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF0052A3), // 농협 진한 파란색
-                      const Color(0xFF1976D2), // 밝은 파란색
-                      const Color(0xFF42A5F5), // 연한 파란색
-                    ],
-                  ),
+                  color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0052A3).withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -253,31 +245,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'NH',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0052A3),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            Image.asset('emotion/all.png',
+                                width: 56, height: 56),
                             const SizedBox(width: 12),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,22 +256,15 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: NHColors.gray800,
                                     letterSpacing: 0.5,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
                                   ),
                                 ),
                                 Text(
                                   '오늘을 담아 미래를 여는 나만의 타임캡슐',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: NHColors.gray600,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

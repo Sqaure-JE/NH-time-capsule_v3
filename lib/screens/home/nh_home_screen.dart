@@ -239,22 +239,22 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset('emotion/all.png',
-                                width: 56, height: 56),
-                            const SizedBox(width: 12),
+                                width: 100, height: 100),
+                            const SizedBox(width: 16),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '금융 타임캡슐',
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: NHColors.gray800,
                                     letterSpacing: 0.5,
@@ -263,7 +263,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                 Text(
                                   '오늘을 담아 미래를 여는 나만의 타임캡슐',
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     color: NHColors.gray600,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -2151,39 +2151,13 @@ class _NHHomeScreenState extends State<NHHomeScreen>
   }
 
   void _navigateToDiaryWriting() {
-    // 첫 번째 활성 캡슐이 있으면 해당 캡슐의 일기 작성으로, 없으면 일반 일기 작성으로
-    if (capsules.isNotEmpty) {
-      final activeCapsule = capsules.firstWhere(
-        (c) => c.status == CapsuleStatus.active,
-        orElse: () => capsules.first,
-      );
-
-      if (activeCapsule.isPersonal) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                PersonalCapsuleDiaryScreen(capsule: activeCapsule),
-          ),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                GroupCapsuleDiaryScreen(capsule: activeCapsule),
-          ),
-        );
-      }
-    } else {
-      // 활성 캡슐이 없으면 일반 일기 작성으로
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const GeneralDiaryScreen(),
-        ),
-      );
-    }
+    // 푸시 알림 클릭 시 항상 일반금융일기로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GeneralDiaryScreen(),
+      ),
+    );
   }
 
   // 카테고리별 아이콘 가져오기

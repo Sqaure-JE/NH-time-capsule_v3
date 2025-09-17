@@ -47,7 +47,7 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
   final List<Map<String, dynamic>> emotions = [
     {'id': 'joy', 'emoji': '😊', 'name': '기쁨이', 'color': NHColors.joy},
     {'id': 'sadness', 'emoji': '😢', 'name': '슬픔이', 'color': NHColors.sadness},
-    {'id': 'anger', 'emoji': '😡', 'name': '분노', 'color': NHColors.anger},
+    {'id': 'anger', 'emoji': '😡', 'name': '버럭이', 'color': NHColors.anger},
     {'id': 'fear', 'emoji': '😰', 'name': '불안이', 'color': NHColors.fear},
     {'id': 'disgust', 'emoji': '🤢', 'name': '까칠이', 'color': NHColors.disgust},
   ];
@@ -1161,7 +1161,7 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
           {
             'date': '2월 3일',
             'emotion': '😡',
-            'emotionName': '분노',
+            'emotionName': '버럭이',
             'amount': '8,000',
             'type': 'expense',
             'category': '교통비',

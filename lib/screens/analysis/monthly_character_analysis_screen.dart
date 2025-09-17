@@ -60,7 +60,7 @@ class _MonthlyCharacterAnalysisScreenState
       },
       {
         'emoji': '😡',
-        'name': '분노',
+        'name': '버럭이',
         'level': 2,
         'percentage': 8,
         'color': NHColors.anger,
@@ -1509,7 +1509,7 @@ class _MonthlyCharacterAnalysisScreenState
               _buildLegendItem('😊', '기쁨이'),
               _buildLegendItem('😰', '불안이'),
               _buildLegendItem('😢', '슬픔이'),
-              _buildLegendItem('😡', '분노'),
+              _buildLegendItem('😡', '버럭이'),
               _buildLegendItem('🤢', '까칠이'),
             ],
           ),

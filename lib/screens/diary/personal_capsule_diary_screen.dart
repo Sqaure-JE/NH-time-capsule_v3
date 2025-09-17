@@ -63,7 +63,7 @@ class _PersonalCapsuleDiaryScreenState
     {
       'id': 'anger',
       'emoji': '😡',
-      'name': '분노',
+      'name': '버럭이',
       'color': NHColors.anger,
       'level': 3,
       'description': '불합리한 지출에 단호하게 대처해요.',

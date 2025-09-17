@@ -593,7 +593,7 @@ class _PersonalCapsuleOpenScreenState extends State<PersonalCapsuleOpenScreen>
             children: [
               const Text('달성률', style: TextStyle(color: NHColors.gray600)),
               Text(
-                '${capsule.achievementRate}%',
+                '${capsule.achievementRate.round()}%',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: NHColors.success,

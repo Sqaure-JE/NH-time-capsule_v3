@@ -105,7 +105,7 @@ class EmotionCharacter {
         EmotionCharacter(
           id: 'anger',
           emoji: '😡',
-          name: '분노',
+          name: '버럭이',
           color: const Color(0xFFFF4444),
           description: '불합리한 지출에 단호하게 대처해요.',
           level: 2,

@@ -182,7 +182,7 @@ class _CapsuleCharacterAnalysisScreenState
       'startDate': '2025.08.01',
       'endDate': '—',
       'totalDiaries': 18,
-      'totalPoints': 620,
+      'totalPoints': 0, // 습관일지는 totalPoints를 0으로 설정하여 목표금액 표시 안함
       'mainCharacter': {
         'emoji': '😊',
         'name': '기쁨이',
@@ -282,7 +282,7 @@ class _CapsuleCharacterAnalysisScreenState
       'totalPoints': 2150,
       'mainCharacter': {
         'emoji': '😤',
-        'name': '분노',
+        'name': '버럭이',
         'level': 5,
         'percentage': 45,
         'growth': '+1레벨',
@@ -1806,10 +1806,11 @@ class _CapsuleCharacterAnalysisScreenState
                 const SizedBox(width: 4),
                 Text('기간: ${analysisData['period'] ?? ''}'),
                 const SizedBox(width: 16),
-                const Icon(Icons.fitness_center,
-                    size: 16, color: NHColors.gray500),
+                const Icon(Icons.show_chart, size: 16, color: NHColors.gray500),
                 const SizedBox(width: 4),
-                Text('연속 달성: ${analysisData['totalDiaries']}일'),
+                Text(widget.capsuleId == 'sample_3'
+                    ? '진행률: 90%'
+                    : '연속 달성: ${analysisData['totalDiaries']}일'),
               ],
             ),
           ],

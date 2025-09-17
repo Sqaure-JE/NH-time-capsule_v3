@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../models/emotion_character.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
+import '../../utils/emotion_assets.dart';
 import '../../widgets/nh_header_widget.dart';
-import 'general_diary_list_screen.dart';
 
 class GeneralDiaryScreen extends StatefulWidget {
   const GeneralDiaryScreen({super.key});
@@ -137,8 +136,6 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
   }
 
   Widget _buildAutoTransactions() {
-    int totalIncome = 2450000;
-    int totalExpense = 7000;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -330,10 +327,16 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          emotion['emoji'],
-                          style: const TextStyle(fontSize: 22),
-                        ),
+                        (EmotionAssets.pathByEmoji(emotion['emoji']) != null)
+                            ? Image.asset(
+                                EmotionAssets.pathByEmoji(emotion['emoji'])!,
+                                width: 32,
+                                height: 32,
+                              )
+                            : Text(
+                                emotion['emoji'],
+                                style: const TextStyle(fontSize: 22),
+                              ),
                         const SizedBox(height: 2),
                         Text(
                           emotion['name'],
@@ -1102,11 +1105,6 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
     );
   }
 
-  // 기존 _pickImage 메서드 제거를 위한 더미 메서드
-  Future<void> _pickImage() async {
-    _pickImageFromGallery();
-  }
-
   String _formatAmount(String value) {
     if (value.isEmpty) return '';
     final number = int.tryParse(value);
@@ -1377,11 +1375,6 @@ class _GeneralDiaryScreenState extends State<GeneralDiaryScreen> {
       );
       return;
     }
-
-    final emotionName = emotions.firstWhere(
-      (e) => e['id'] == selectedEmotion,
-      orElse: () => {'name': ''},
-    )['name'];
 
     final categoryName =
         (transactionType == 'expense' ? expenseCategories : incomeCategories)

@@ -1009,39 +1009,166 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                         alignment: Alignment.center,
                         clipBehavior: Clip.none,
                         children: [
-                          // 알 형태
+                          // 3D 보석 타임캡슐 형태
                           Container(
                             width: 86,
                             height: 106,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                              gradient: const RadialGradient(
+                                center: Alignment(-0.3, -0.4),
+                                radius: 1.2,
                                 colors: [
-                                  Color(0xFFFFFFFF),
-                                  Color(0xFFF5F5F5),
-                                  Color(0xFFE0E0E0),
+                                  Color(0xFFFFFFFF), // 하이라이트
+                                  Color(0xFFF3E5F5), // 연한 보라
+                                  Color(0xFFE1BEE7), // 중간 보라
+                                  Color(0xFFCE93D8), // 진한 보라
+                                  Color(0xFFBA68C8), // 더 진한 보라
+                                  Color(0xFF9C27B0), // 가장 진한 보라
                                 ],
+                                stops: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
                               ),
                               borderRadius: BorderRadius.circular(50),
                               border: Border.all(
-                                color: const Color(0xFFBDBDBD),
-                                width: 2,
+                                color: const Color(0xFF8E24AA),
+                                width: 3,
                               ),
                               boxShadow: [
+                                // 메인 그림자 (아래쪽)
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 8),
+                                  color:
+                                      const Color(0xFF7B1FA2).withOpacity(0.4),
+                                  blurRadius: 25,
+                                  offset: const Offset(0, 12),
+                                  spreadRadius: 2,
+                                ),
+                                // 내부 그림자 효과
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFF4A148C).withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(3, 8),
+                                ),
+                                // 상단 하이라이트
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.8),
+                                  blurRadius: 10,
+                                  offset: const Offset(-6, -6),
+                                  spreadRadius: -2,
+                                ),
+                                // 측면 하이라이트
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFFE1BEE7).withOpacity(0.6),
+                                  blurRadius: 8,
+                                  offset: const Offset(-2, -10),
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Opacity(
-                                opacity: (1.0 - shardsProgress).clamp(0.0, 1.0),
-                                child: const Text('🥚',
-                                    style: TextStyle(fontSize: 28)),
-                              ),
+                            child: Stack(
+                              children: [
+                                // 보석 반짝임 효과들
+                                Positioned(
+                                  top: 20,
+                                  left: 15,
+                                  child: Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.9),
+                                          const Color(0xFFE1BEE7)
+                                              .withOpacity(0.3),
+                                        ],
+                                      ),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.8),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 35,
+                                  right: 20,
+                                  child: Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.8),
+                                          const Color(0xFFBA68C8)
+                                              .withOpacity(0.4),
+                                        ],
+                                      ),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.6),
+                                          blurRadius: 6,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 25,
+                                  left: 15,
+                                  child: Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.7),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.5),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 40,
+                                  right: 25,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.9),
+                                          const Color(0xFFCE93D8)
+                                              .withOpacity(0.3),
+                                        ],
+                                      ),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.7),
+                                          blurRadius: 6,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // 중앙 보석/보물 이모지
+                                Center(
+                                  child: Opacity(
+                                    opacity:
+                                        (1.0 - shardsProgress).clamp(0.0, 1.0),
+                                    child: const Text('💎',
+                                        style: TextStyle(fontSize: 36)),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 

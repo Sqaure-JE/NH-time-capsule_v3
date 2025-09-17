@@ -274,9 +274,10 @@ class TimeCapsule {
   // 샘플 멤버 정보 (실제 데이터 연동 시 교체)
   List<MemberInfo> get sampleMembers => [
         MemberInfo('김올리', 500000, 25.0, '👤', true),
-        MemberInfo('박수빈', 500000, 25.0, '👩', false),
-        MemberInfo('이정은', 500000, 25.0, '👨', false),
-        MemberInfo('최민수', 500000, 25.0, '👩‍🦱', false),
+        MemberInfo('이정은', 500000, 25.0, '👩', false),
+        MemberInfo('김수름', 500000, 25.0, '👨', false),
+        MemberInfo('김혜진', 500000, 25.0, '👩‍🦱', false),
+        MemberInfo('한지혜', 500000, 25.0, '👩', false),
       ];
   List<ExpenseInfo> get sampleExpenses => [
         ExpenseInfo('KTX', 480000, 24.0),
@@ -309,7 +310,7 @@ class TimeCapsule {
         EmotionStatInfo('😊', '기쁨이', 68, NHColors.joy),
         EmotionStatInfo('😰', '불안이', 15, NHColors.fear),
         EmotionStatInfo('😢', '슬픔이', 10, NHColors.sadness),
-        EmotionStatInfo('😡', '분노', 4, NHColors.anger),
+        EmotionStatInfo('😡', '버럭이', 4, NHColors.anger),
         EmotionStatInfo('🤢', '까칠이', 3, NHColors.disgust),
       ];
   List<PersonalHighlightInfo> get personalHighlights => [

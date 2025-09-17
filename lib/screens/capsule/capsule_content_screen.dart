@@ -57,8 +57,8 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'title': '부산여행 계획 시작',
           'content': '친구들과 함께 부산여행을 계획하기 시작했어요. KTX 예약부터 숙소까지 차근차근 준비해보겠습니다!',
           'photo': 'assets/images/모임형_타임캡슐1.png',
-          'members': ['김올리', '박수빈', '이정은', '최민수'],
-          'author': '김올리(나)',
+          'members': ['이정은', '김수름', '김혜진', '한지혜'],
+          'author': '이정은(나)',
         },
         {
           'date': '2025.08.05',
@@ -68,8 +68,8 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'content':
               '부산행 KTX 왕복을 예약했어요! 4명이서 48만원으로 저렴하게 예약 성공! 해운대 바다가 벌써 그리워집니다.',
           'photo': null,
-          'members': ['김올리', '박수빈', '이정은', '최민수'],
-          'author': '박수빈',
+          'members': ['한지혜', '이정은', '김수름', '김혜진'],
+          'author': '김수름',
         },
         {
           'date': '2025.08.20',
@@ -79,7 +79,7 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'content':
               '해운대 근처 숙소를 예약했어요! 바다가 보이는 방이라서 모두 기대하고 있어요. 2박3일 60만원으로 합리적이네요!',
           'photo': 'assets/images/모임형_타임캡슐2.png',
-          'members': ['김올리', '박수빈'],
+          'members': ['김혜진', '한지혜'],
           'author': '이정은',
         },
         {
@@ -90,8 +90,8 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'content':
               '국제시장 맛집들과 자갈치시장 회센터까지 리스트업 완료! 친구들과 함께 부산의 모든 맛을 경험해보겠어요.',
           'photo': null,
-          'members': ['김올리', '이정은', '최민수'],
-          'author': '최민수',
+          'members': ['한지혜', '이정은', '김혜진'],
+          'author': '김혜진',
         },
         {
           'date': '2025.10.15',
@@ -101,8 +101,8 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'content':
               '드디어 부산여행 목표 금액 200만원을 달성했어요! 친구들과 함께 만든 추억은 정말 소중할 것 같아요. 출발만 남았네요!',
           'photo': 'assets/images/모임형_타임캡슐3.png',
-          'members': ['김올리', '박수빈', '이정은', '최민수'],
-          'author': '김올리(나)',
+          'members': ['한지혜', '이정은', '김수름', '김혜진'],
+          'author': '이정은(나)',
         },
       ];
     } else {
@@ -169,9 +169,9 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'date': '2025.07.10',
           'type': '입금',
           'amount': 120000,
-          'description': '부산여행 계획 자금 (박수빈)',
+          'description': '부산여행 계획 자금 (김수름)',
           'category': '개인기여',
-          'member': '박수빈',
+          'member': '김수름',
         },
         {
           'date': '2025.08.05',
@@ -201,9 +201,9 @@ class _CapsuleContentScreenState extends State<CapsuleContentScreen> {
           'date': '2025.10.01',
           'type': '입금',
           'amount': 160000,
-          'description': '부산여행 추가 자금 (최민수)',
+          'description': '부산여행 추가 자금 (김혜진)',
           'category': '개인기여',
-          'member': '최민수',
+          'member': '김혜진',
         },
         {
           'date': '2025.10.15',

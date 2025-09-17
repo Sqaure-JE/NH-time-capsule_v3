@@ -5,6 +5,7 @@ import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/nh_header_widget.dart';
 import '../../models/time_capsule.dart';
+import '../../utils/emotion_assets.dart';
 
 class PersonalCapsuleDiaryScreen extends StatefulWidget {
   final TimeCapsule capsule;
@@ -89,7 +90,30 @@ class _PersonalCapsuleDiaryScreenState
   List<Map<String, dynamic>> get milestones {
     final category = widget.capsule.category;
 
-    if (category == 'reading') {
+    if (category == 'golf') {
+      return [
+        {
+          'id': 'screen_round',
+          'emoji': '🖥️',
+          'text': '스크린 라운드 완료',
+          'bonus': 15
+        },
+        {'id': 'field_round', 'emoji': '⛳️', 'text': '필드 라운드 진행', 'bonus': 20},
+        {
+          'id': 'range_practice',
+          'emoji': '🏌️‍♂️',
+          'text': '연습장 스윙 연습',
+          'bonus': 10
+        },
+        {
+          'id': 'putting_drill',
+          'emoji': '🕳️',
+          'text': '퍼팅 드릴 수행',
+          'bonus': 12
+        },
+        {'id': 'short_game', 'emoji': '🧩', 'text': '숏게임 집중 연습', 'bonus': 15},
+      ];
+    } else if (category == 'reading') {
       // 독서 습관용 이정표
       return [
         {'id': 'daily_read', 'emoji': '📖', 'text': '오늘 독서했어요', 'bonus': 10},
@@ -149,11 +173,15 @@ class _PersonalCapsuleDiaryScreenState
         (m) => m['id'] == milestone,
         orElse: () => {'bonus': 0},
       )['bonus'] as int;
-  int get amountPoints => (amount.isNotEmpty &&
-          int.tryParse(amount.replaceAll(',', '')) != null &&
-          int.parse(amount.replaceAll(',', '')) > 0)
-      ? 15
-      : 0;
+  int get amountPoints {
+    if (currentCapsule['targetAmount'] == 0) return 0;
+    return (amount.isNotEmpty &&
+            int.tryParse(amount.replaceAll(',', '')) != null &&
+            int.parse(amount.replaceAll(',', '')) > 0)
+        ? 15
+        : 0;
+  }
+
   int get totalPoints =>
       basePoints +
       imagePoints +
@@ -188,6 +216,7 @@ class _PersonalCapsuleDiaryScreenState
         ? (remainingAmount / currentCapsule['daysLeft']).ceil()
         : 0;
 
+    final bool isHabit = currentCapsule['targetAmount'] == 0;
     return Scaffold(
       backgroundColor: NHColors.background,
       body: SafeArea(
@@ -215,7 +244,7 @@ class _PersonalCapsuleDiaryScreenState
                     const SizedBox(height: 16),
                     _buildMilestoneSelector(selectedMilestoneData),
                     const SizedBox(height: 16),
-                    _buildAmountInput(progressToTarget),
+                    if (!isHabit) _buildAmountInput(progressToTarget),
                     const SizedBox(height: 16),
                     _buildDiaryInput(selectedEmotionData),
                     const SizedBox(height: 16),
@@ -226,7 +255,8 @@ class _PersonalCapsuleDiaryScreenState
                       selectedMilestoneData,
                     ),
                     const SizedBox(height: 16),
-                    _buildProgressInfo(remainingAmount, avgPerDay),
+                    if (!isHabit)
+                      _buildProgressInfo(remainingAmount, avgPerDay),
                   ],
                 ),
               ),
@@ -461,10 +491,18 @@ class _PersonalCapsuleDiaryScreenState
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          emotion['emoji'],
-                          style: const TextStyle(fontSize: 22),
-                        ),
+                        (EmotionAssets.pathByEmoji(emotion['emoji']) != null)
+                            ? Image.asset(
+                                EmotionAssets.pathByEmoji(
+                                  emotion['emoji'],
+                                )!,
+                                width: 22,
+                                height: 22,
+                              )
+                            : Text(
+                                emotion['emoji'],
+                                style: const TextStyle(fontSize: 22),
+                              ),
                         const SizedBox(height: 2),
                         Text(
                           emotion['name'],
@@ -674,12 +712,25 @@ class _PersonalCapsuleDiaryScreenState
             children: [
               if (selectedEmotionData.isNotEmpty)
                 Text(
-                  selectedEmotionData['emoji'],
-                  style: const TextStyle(fontSize: 20),
+                  '',
                 ),
+              if (selectedEmotionData.isNotEmpty)
+                (EmotionAssets.pathByEmoji(selectedEmotionData['emoji']) !=
+                        null)
+                    ? Image.asset(
+                        EmotionAssets.pathByEmoji(
+                          selectedEmotionData['emoji'],
+                        )!,
+                        width: 20,
+                        height: 20,
+                      )
+                    : Text(selectedEmotionData['emoji'],
+                        style: const TextStyle(fontSize: 20)),
               const SizedBox(width: 6),
-              const Text(
-                '📖 목표 달성 스토리',
+              Text(
+                widget.capsule.category == 'golf'
+                    ? '⛳ 오늘의 골프 복기'
+                    : '📖 목표 달성 스토리',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -707,15 +758,19 @@ class _PersonalCapsuleDiaryScreenState
             },
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: selectedEmotionData.isNotEmpty
-                  ? '${selectedEmotionData['name']}와 함께 목표를 향한 오늘의 여정을 기록해보세요...'
-                  : '오늘 목표를 위해 어떤 노력을 했나요?',
+              hintText: widget.capsule.category == 'golf'
+                  ? '라운드/스크린/연습장 중 무엇을 했나요? 드라이버/아이언/어프로치/퍼팅 중 무엇을 중점적으로 연습했나요? 오늘의 베스트/아쉬운 샷은? 다음에 보완할 점은?'
+                  : (selectedEmotionData.isNotEmpty
+                      ? '${selectedEmotionData['name']}와 함께 목표를 향한 오늘의 여정을 기록해보세요...'
+                      : '오늘 목표를 위해 어떤 노력을 했나요?'),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '💡 예시: "오늘 점심을 도시락으로 해서 5천원 절약했어. 여행 가는 날이 점점 가까워지는 게 실감나!"',
-            style: TextStyle(fontSize: 12, color: NHColors.gray500),
+          Text(
+            widget.capsule.category == 'golf'
+                ? '💡 예시: "스크린 18H 85타, 드라이버 페어웨이 적중률 57%. 아이언 탄도 낮아 훅 발생, 다음엔 오른손 그립 약간 약하게. 퍼팅은 3퍼 4번으로 거리감 이슈—롱퍼팅 라인 읽기 연습 필요."'
+                : '💡 예시: "오늘 점심을 도시락으로 해서 5천원 절약했어. 여행 가는 날이 점점 가까워지는 게 실감나!"',
+            style: const TextStyle(fontSize: 12, color: NHColors.gray500),
           ),
         ],
       ),
@@ -1347,7 +1402,25 @@ class _PersonalCapsuleDiaryScreenState
     // 이정표별 AI 추천 (카테고리별로 다르게 처리)
     final category = widget.capsule.category;
 
-    if (category == 'reading') {
+    if (category == 'golf') {
+      // 골프 습관 관련 메시지 (상황별 템플릿)
+      if (milestone == 'field_round') {
+        aiContent =
+            '${emotionName}가 라운드를 복기해요! ⛳️ 오늘 라운드 결과를 정리해볼게요. 드라이버는 페어웨이 적중률 ${progressPercentage}% 느낌, 아이언은 탄도/방향이 일관되었는지 체크했어요. 퍼팅은 3퍼 빈도를 줄이기 위해 롱퍼팅 거리감 훈련이 필요해요. 다음 라운드에선 티샷 루틴을 3단계로 단순화해볼게요!';
+      } else if (milestone == 'screen_round') {
+        aiContent =
+            '${emotionName}가 스크린 라운드를 복기해요! 🖥️ 페이드/드로우 구질을 의도대로 만들었는지 확인했어요. 방향성은 괜찮았지만, 어프로치 탄도가 높아 런이 부족했어요. 다음엔 9시-3시 스윙으로 컨트롤 샷을 더 연습할게요!';
+      } else if (milestone == 'range_practice') {
+        aiContent =
+            '${emotionName}가 연습장 훈련을 정리해요! 🏌️‍♂️ 드라이버는 헤드스피드보다 페이스 관리에 집중했고, 아이언은 볼-터프 순으로 클린 임팩트 연습을 했어요. 퍼팅은 스트로크 템포 유지를 위한 메트로놈 훈련을 진행했어요. 내일은 숏게임 샷 50구 루틴으로 갈게요!';
+      } else if (milestone == 'putting_drill') {
+        aiContent =
+            '${emotionName}가 퍼팅 드릴을 복기해요! 🕳️ 3m 10회 중 성공 ${progressPercentage}% 수준, 거리감은 향상됐지만 라인 읽기에서 실수가 있었어요. 다음엔 브레이크 반 정도 더 보는 전략을 써볼게요!';
+      } else {
+        aiContent =
+            '${emotionName}가 오늘의 골프를 돌아봐요! 🎯 어떤 샷이 좋았고, 무엇을 보완할지 한 줄로 정리해보면 다음 루틴이 더 선명해져요. 작은 개선이 쌓이면 스코어는 분명히 내려가요!';
+      }
+    } else if (category == 'reading') {
       // 독서 습관 관련 메시지
       if (milestone == 'daily_read') {
         aiContent =

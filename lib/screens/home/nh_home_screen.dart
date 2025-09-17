@@ -22,7 +22,7 @@ class NHHomeScreen extends StatefulWidget {
 }
 
 class _NHHomeScreenState extends State<NHHomeScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late UserData userData;
   late List<TimeCapsule> capsules;
   late List<EmotionCharacter> characters;
@@ -32,6 +32,10 @@ class _NHHomeScreenState extends State<NHHomeScreen>
   Timer? _autoHideTimer; // 자동 숨김 타이머
   bool _hasShownNotification = false;
   bool _notificationPermanentlyDismissed = false; // 푸시 알림 영구 해제 플래그
+
+  // 🥚 알 깨짐 오버레이 애니메이션
+  late AnimationController _eggController;
+  bool _showEggOverlay = false;
 
   @override
   void initState() {
@@ -52,7 +56,23 @@ class _NHHomeScreenState extends State<NHHomeScreen>
       curve: Curves.elasticOut,
     ));
 
-    // 5초 후 푸시 알림 표시 (더 빨리 표시)
+    // 알 깨짐 애니메이션 컨트롤러
+    _eggController = AnimationController(
+      duration: const Duration(milliseconds: 5000),
+      vsync: this,
+    );
+    _eggController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            _showEggOverlay = false;
+          });
+          _eggController.reset();
+        }
+      }
+    });
+
+    // 푸시 알림 타이머 시작 (2초 뒤 노출)
     _startNotificationTimer();
   }
 
@@ -61,11 +81,12 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     _notificationController.dispose();
     _notificationTimer?.cancel();
     _autoHideTimer?.cancel();
+    _eggController.dispose();
     super.dispose();
   }
 
   void _startNotificationTimer() {
-    _notificationTimer = Timer(const Duration(seconds: 5), () {
+    _notificationTimer = Timer(const Duration(seconds: 2), () {
       if (mounted &&
           !_hasShownNotification &&
           !_notificationPermanentlyDismissed) {
@@ -84,6 +105,14 @@ class _NHHomeScreenState extends State<NHHomeScreen>
         _hideNotification();
       }
     });
+
+    // 푸시 표시 직후 알 깨짐 오버레이 시퀀스 (완성된 캡슐이 있을 때만)
+    if (capsules.any((c) => c.progress >= 1.0)) {
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        _triggerEggCrackOverlay();
+      });
+    }
   }
 
   void _hideNotification() {
@@ -125,13 +154,13 @@ class _NHHomeScreenState extends State<NHHomeScreen>
       ),
       TimeCapsule(
         id: 'sample_3',
-        title: '다낭 여행',
-        category: 'travel',
+        title: '🏌️‍♂️ 골프 습관 일지',
+        category: 'golf',
         type: CapsuleType.personal,
-        targetAmount: 2000000,
-        currentAmount: 1800000, // 90% 진행
+        targetAmount: 0, // 습관형 (금액 목표 없음)
+        currentAmount: 90, // 90일 달성 (90%)
         startDate: DateTime.now().subtract(const Duration(days: 30)),
-        endDate: DateTime.now().add(const Duration(days: 150)),
+        endDate: DateTime.now().add(const Duration(days: 9999999)), // 무기한
         createdAt: DateTime.now().subtract(const Duration(days: 30)),
         memberIds: [],
       ),
@@ -485,7 +514,7 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                     left = screenWidth * 0.45;
                                   }
                                 } else if (capsule.id == 'sample_3') {
-                                  // 🥇 1위: 다낭여행 (90%) - 지표면 바로 위, 가장 높은 위치
+                                  // 습관형 골프 일지 - 90% 근접 위치 (지표면 바로 위)
                                   top = soilSurface - 40;
                                   left = screenWidth * 0.7; // 오른쪽
                                 } else if (capsule.id == 'sample_5') {
@@ -504,10 +533,14 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                                   // 5위: 내집마련 (30%) - 흙 속 깊은 곳
                                   top = soilSurface + 180;
                                   left = screenWidth * 0.6; // 오른쪽 중간
+                                } else if (capsule.id == '새로운_캡슐_ID') {
+                                  // 원하는 위치 지정
+                                  top = soilSurface + 100; // 흙 속 중간 깊이
+                                  left = screenWidth * 0.5; // 화면 중앙
                                 } else {
-                                  // 6위: 새 캡슐 (0%) - 가장 깊은 곳
+                                  // 기본 위치 (가장 깊은 곳)
                                   top = soilSurface + 235;
-                                  left = screenWidth * 0.35; // 중앙 왼쪽
+                                  left = screenWidth * 0.15; // 중앙 왼쪽
                                 }
 
                                 return Positioned(
@@ -815,10 +848,17 @@ class _NHHomeScreenState extends State<NHHomeScreen>
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      character.emoji,
-                                      style: const TextStyle(fontSize: 32),
-                                    ),
+                                    character.assetPath != null
+                                        ? Image.asset(
+                                            character.assetPath!,
+                                            width: 32,
+                                            height: 32,
+                                          )
+                                        : Text(
+                                            character.emoji,
+                                            style:
+                                                const TextStyle(fontSize: 32),
+                                          ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
@@ -898,6 +938,9 @@ class _NHHomeScreenState extends State<NHHomeScreen>
 
           // 푸시 알림 오버레이
           _buildPushNotificationOverlay(),
+
+          // 알 깨짐 오버레이
+          _buildEggCrackOverlay(),
         ],
       ),
 
@@ -920,6 +963,186 @@ class _NHHomeScreenState extends State<NHHomeScreen>
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
+  }
+
+  // 🥚 알 깨짐 오버레이 빌더
+  Widget _buildEggCrackOverlay() {
+    if (!_showEggOverlay) return const SizedBox.shrink();
+
+    final Animation<double> t = CurvedAnimation(
+      parent: _eggController,
+      curve: Curves.easeOutCubic,
+    );
+
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: true,
+        child: AnimatedBuilder(
+          animation: t,
+          builder: (context, _) {
+            final double value = t.value;
+            // 스케일과 투명도
+            final double scale = value < 0.6
+                ? 0.8 + (value / 0.6) * 0.3 // 0.8 -> 1.1 팽창
+                : 1.1 - ((value - 0.6) / 0.4) * 0.2; // 살짝 수축
+            final double overlayOpacity = value < 0.85
+                ? 0.9
+                : (1.0 - (value - 0.85) / 0.15).clamp(0.0, 1.0);
+
+            // 파편 확산 진행도 (0.4 이후 활성화)
+            final double shardsProgress =
+                value <= 0.4 ? 0.0 : ((value - 0.4) / 0.6).clamp(0.0, 1.0);
+
+            return Opacity(
+              opacity: overlayOpacity,
+              child: Container(
+                alignment: Alignment.center,
+                // 화면 중앙에 배치 (정원 중앙 근처)
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 메시지 배지
+                    AnimatedOpacity(
+                      opacity: value > 0.15 ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: NHColors.primary.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text('🎉 ', style: TextStyle(fontSize: 16)),
+                            Text(
+                              '완성된 타임캡슐이 있어요!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: NHColors.gray800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    // 알 & 크랙
+                    Transform.scale(
+                      scale: scale,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          // 알 형태
+                          Container(
+                            width: 86,
+                            height: 106,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFFFFFFFF),
+                                  Color(0xFFF5F5F5),
+                                  Color(0xFFE0E0E0),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(
+                                color: const Color(0xFFBDBDBD),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Opacity(
+                                opacity: (1.0 - shardsProgress).clamp(0.0, 1.0),
+                                child: const Text('🥚',
+                                    style: TextStyle(fontSize: 28)),
+                              ),
+                            ),
+                          ),
+
+                          // 크랙 라인 (등장 후 점차 사라짐)
+                          if (shardsProgress > 0)
+                            Opacity(
+                              opacity: (1.0 - shardsProgress).clamp(0.0, 1.0),
+                              child: CustomPaint(
+                                size: const Size(86, 106),
+                                painter: _CrackPainter(),
+                              ),
+                            ),
+
+                          // 파편 효과
+                          ...List.generate(10, (i) {
+                            final double angle = (i * 36) * 3.14159 / 180.0;
+                            final double radius = 12 + shardsProgress * 36;
+                            return Transform.translate(
+                              offset: Offset(
+                                radius * math.cos(angle),
+                                radius * math.sin(angle),
+                              ),
+                              child: Opacity(
+                                opacity: (shardsProgress > 0.1)
+                                    ? (1.0 - shardsProgress).clamp(0.0, 1.0)
+                                    : 0.0,
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: NHColors.orange.withOpacity(0.9),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: NHColors.orange.withOpacity(0.5),
+                                        blurRadius: 6,
+                                        spreadRadius: 0.5,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _triggerEggCrackOverlay() {
+    if (!mounted) return;
+    setState(() {
+      _showEggOverlay = true;
+    });
+    _eggController.forward(from: 0.0);
   }
 
   // 🌱 성장하는 타임캡슐 위젯 (모바일 최적화 + 단계 배지)
@@ -2006,6 +2229,8 @@ class _NHHomeScreenState extends State<NHHomeScreen>
     switch (category) {
       case 'travel':
         return '🏖️';
+      case 'golf':
+        return '🏌️‍♂️';
       case 'home':
         return '🏠';
       case 'relationship':
@@ -2288,4 +2513,48 @@ class _NHHomeScreenState extends State<NHHomeScreen>
       ),
     );
   }
+}
+
+class _CrackPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint crackPaint = Paint()
+      ..color = const Color(0xFF9E9E9E)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final Path crack = Path();
+    final double midX = size.width / 2;
+    final double midY = size.height / 2;
+
+    // 메인 크랙: 중앙 수평 지그재그
+    crack.moveTo(midX - 26, midY);
+    crack.lineTo(midX - 18, midY - 6);
+    crack.lineTo(midX - 10, midY + 4);
+    crack.lineTo(midX - 2, midY - 6);
+    crack.lineTo(midX + 6, midY + 4);
+    crack.lineTo(midX + 14, midY - 6);
+    crack.lineTo(midX + 22, midY + 2);
+
+    // 세부 크랙 1: 좌측 아래 방향
+    final Path subLeft = Path();
+    subLeft.moveTo(midX - 12, midY + 2);
+    subLeft.lineTo(midX - 16, midY + 10);
+    subLeft.lineTo(midX - 12, midY + 16);
+
+    // 세부 크랙 2: 우측 위 방향
+    final Path subRight = Path();
+    subRight.moveTo(midX + 8, midY - 2);
+    subRight.lineTo(midX + 12, midY - 9);
+    subRight.lineTo(midX + 16, midY - 14);
+
+    canvas.drawPath(crack, crackPaint);
+    canvas.drawPath(subLeft, crackPaint..strokeWidth = 1.2);
+    canvas.drawPath(subRight, crackPaint..strokeWidth = 1.2);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

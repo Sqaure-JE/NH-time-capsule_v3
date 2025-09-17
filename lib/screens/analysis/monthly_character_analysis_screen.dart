@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
+import '../../utils/emotion_assets.dart';
 import '../../widgets/nh_header_widget.dart';
 
 class MonthlyCharacterAnalysisScreen extends StatefulWidget {
@@ -416,7 +417,13 @@ class _MonthlyCharacterAnalysisScreenState
             ),
           ),
           const SizedBox(height: 16),
-          Text(mainChar['emoji'], style: const TextStyle(fontSize: 48)),
+          (EmotionAssets.pathByEmoji(mainChar['emoji']) != null)
+              ? Image.asset(
+                  EmotionAssets.pathByEmoji(mainChar['emoji'])!,
+                  width: 48,
+                  height: 48,
+                )
+              : Text(mainChar['emoji'], style: const TextStyle(fontSize: 48)),
           const SizedBox(height: 8),
           Text(
             '${mainChar['name']} ${mainChar['growth']}',
@@ -499,10 +506,16 @@ class _MonthlyCharacterAnalysisScreenState
               ),
               child: Row(
                 children: [
-                  Text(
-                    character['emoji'],
-                    style: const TextStyle(fontSize: 24),
-                  ),
+                  (EmotionAssets.pathByEmoji(character['emoji']) != null)
+                      ? Image.asset(
+                          EmotionAssets.pathByEmoji(character['emoji'])!,
+                          width: 24,
+                          height: 24,
+                        )
+                      : Text(
+                          character['emoji'],
+                          style: const TextStyle(fontSize: 24),
+                        ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -622,10 +635,19 @@ class _MonthlyCharacterAnalysisScreenState
                           ).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          highlight['emotion'],
-                          style: const TextStyle(fontSize: 20),
-                        ),
+                        child:
+                            (EmotionAssets.pathByEmoji(highlight['emotion']) !=
+                                    null)
+                                ? Image.asset(
+                                    EmotionAssets.pathByEmoji(
+                                        highlight['emotion'])!,
+                                    width: 20,
+                                    height: 20,
+                                  )
+                                : Text(
+                                    highlight['emotion'],
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(

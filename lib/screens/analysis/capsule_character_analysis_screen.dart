@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
+import '../../utils/emotion_assets.dart';
 import '../../widgets/nh_header_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class CapsuleCharacterAnalysisScreen extends StatefulWidget {
   final String capsuleId;
@@ -23,8 +25,8 @@ class _CapsuleCharacterAnalysisScreenState
         return _getJejuAnalysisData();
       case 'sample_2': // 친구들과 부산여행
         return _getBusanAnalysisData();
-      case 'sample_3': // 다낭 여행
-        return _getDanangAnalysisData();
+      case 'sample_3': // 골프 습관 일지
+        return _getGolfHabitAnalysisData();
       case 'sample_4': // 내집마련
         return _getHouseAnalysisData();
       case 'sample_5': // 결혼기념일
@@ -168,6 +170,103 @@ class _CapsuleCharacterAnalysisScreenState
         {'icon': '📈', 'title': '감정 성장', 'desc': '기쁨이 +3레벨'},
         {'icon': '📅', 'title': '꾸준한 기록', 'desc': '32일 기록'},
         {'icon': '💰', 'title': '효율적 저축', 'desc': '월 평균 360만원'},
+      ],
+    };
+  }
+
+  // 골프 습관 일지 분석 데이터
+  Map<String, dynamic> _getGolfHabitAnalysisData() {
+    return {
+      'capsuleTitle': '골프 습관 일지',
+      'period': '무기한',
+      'startDate': '2025.08.01',
+      'endDate': '—',
+      'totalDiaries': 18,
+      'totalPoints': 620,
+      'mainCharacter': {
+        'emoji': '😊',
+        'name': '기쁨이',
+        'level': 7,
+        'percentage': 68,
+        'growth': '+1레벨',
+        'color': NHColors.joy,
+      },
+      'emotionJourney': [
+        {
+          'phase': '시작',
+          'period': '1-2주',
+          'mainEmotion': '😰',
+          'description': '루틴 정착에 대한 부담',
+          'percentage': 42,
+          'color': NHColors.fear,
+        },
+        {
+          'phase': '중반',
+          'period': '3-4주',
+          'mainEmotion': '😊',
+          'description': '샷 일관성 향상에 따른 만족',
+          'percentage': 60,
+          'color': NHColors.joy,
+        },
+        {
+          'phase': '현재',
+          'period': '5주~',
+          'mainEmotion': '😊',
+          'description': '숏게임 개선 성과에 대한 기쁨',
+          'percentage': 78,
+          'color': NHColors.joy,
+        },
+      ],
+      'monthlyEmotionChanges': [
+        {
+          'month': '8월',
+          'joy': 40,
+          'fear': 45,
+          'sadness': 8,
+          'anger': 4,
+          'disgust': 3
+        },
+        {
+          'month': '9월',
+          'joy': 55,
+          'fear': 30,
+          'sadness': 8,
+          'anger': 4,
+          'disgust': 3
+        },
+        {
+          'month': '10월',
+          'joy': 68,
+          'fear': 20,
+          'sadness': 6,
+          'anger': 3,
+          'disgust': 3
+        },
+      ],
+      'successPatterns': [
+        {'pattern': '3일 연속 루틴', 'frequency': '주 1회', 'effectiveness': '높음'},
+        {'pattern': '퍼팅 메트로놈', 'frequency': '주 3회', 'effectiveness': '중간'},
+        {'pattern': '숏게임 9시-3시', 'frequency': '주 2회', 'effectiveness': '높음'},
+      ],
+      'recommendations': [
+        {
+          'type': '용품',
+          'name': '퍼팅 매트',
+          'reason': '롱퍼팅 거리감 향상',
+          'benefit': '집중도↑'
+        },
+        {
+          'type': '루틴',
+          'name': '3단계 티샷 루틴',
+          'reason': '오비 감소',
+          'benefit': '일관성↑'
+        },
+      ],
+      'achievements': [
+        {'icon': '🏆', 'title': '루틴 정착', 'desc': '연속 7일 기록'},
+        {'icon': '⛳', 'title': '스크린 베스트', 'desc': '최근 85타'},
+        {'icon': '🕳️', 'title': '3퍼 감소', 'desc': '3퍼 빈도 40%→25%'},
+        {'icon': '🏌️‍♂️', 'title': '드라이버 안정', 'desc': '훅/슬라이스 감소'},
       ],
     };
   }
@@ -1044,7 +1143,13 @@ class _CapsuleCharacterAnalysisScreenState
             ),
           ),
           const SizedBox(height: 16),
-          Text(mainChar['emoji'], style: const TextStyle(fontSize: 48)),
+          (EmotionAssets.pathByEmoji(mainChar['emoji']) != null)
+              ? Image.asset(
+                  EmotionAssets.pathByEmoji(mainChar['emoji'])!,
+                  width: 48,
+                  height: 48,
+                )
+              : Text(mainChar['emoji'], style: const TextStyle(fontSize: 48)),
           const SizedBox(height: 8),
           Text(
             '${mainChar['name']} ${mainChar['growth']}',
@@ -1131,10 +1236,16 @@ class _CapsuleCharacterAnalysisScreenState
                 children: [
                   Row(
                     children: [
-                      Text(
-                        phase['mainEmotion'],
-                        style: const TextStyle(fontSize: 24),
-                      ),
+                      (EmotionAssets.pathByEmoji(phase['mainEmotion']) != null)
+                          ? Image.asset(
+                              EmotionAssets.pathByEmoji(phase['mainEmotion'])!,
+                              width: 24,
+                              height: 24,
+                            )
+                          : Text(
+                              phase['mainEmotion'],
+                              style: const TextStyle(fontSize: 24),
+                            ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -1185,6 +1296,24 @@ class _CapsuleCharacterAnalysisScreenState
   }
 
   Widget _buildMonthlyEmotionChanges() {
+    final List<dynamic> months = analysisData['monthlyEmotionChanges'];
+    // X축 라벨을 0..n-1 인덱스로 매핑
+    final List<String> labels =
+        months.map((m) => m['month'] as String).toList();
+
+    List<FlSpot> spotsOf(String key) {
+      return List<FlSpot>.generate(months.length, (i) {
+        final v = (months[i][key] as num).toDouble();
+        return FlSpot(i.toDouble(), v);
+      });
+    }
+
+    final joySpots = spotsOf('joy');
+    final fearSpots = spotsOf('fear');
+    final sadnessSpots = spotsOf('sadness');
+    final angerSpots = spotsOf('anger');
+    final disgustSpots = spotsOf('disgust');
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1202,7 +1331,7 @@ class _CapsuleCharacterAnalysisScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '📊 월별 감정 변화',
+            '📊 월별 감정 변화 (꺾은선)',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -1210,88 +1339,154 @@ class _CapsuleCharacterAnalysisScreenState
             ),
           ),
           const SizedBox(height: 16),
-          ...analysisData['monthlyEmotionChanges'].map<Widget>(
-            (month) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: NHColors.gray50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    month['month'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: NHColors.gray800,
+          SizedBox(
+            height: 240,
+            child: LineChart(
+              LineChartData(
+                minY: 0,
+                maxY: 100,
+                gridData: FlGridData(show: true, drawVerticalLine: true),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 34,
+                      interval: 20,
+                      getTitlesWidget: (value, meta) => Text(
+                        '${value.toInt()}%',
+                        style: const TextStyle(
+                            fontSize: 10, color: NHColors.gray500),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildEmotionBar('😊', month['joy'], NHColors.joy),
-                      const SizedBox(width: 4),
-                      _buildEmotionBar('😰', month['fear'], NHColors.fear),
-                      const SizedBox(width: 4),
-                      _buildEmotionBar(
-                        '😢',
-                        month['sadness'],
-                        NHColors.sadness,
-                      ),
-                      const SizedBox(width: 4),
-                      _buildEmotionBar('😡', month['anger'], NHColors.anger),
-                      const SizedBox(width: 4),
-                      _buildEmotionBar(
-                        '🤢',
-                        month['disgust'],
-                        NHColors.disgust,
-                      ),
-                    ],
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        final i = value.toInt();
+                        if (i < 0 || i >= labels.length)
+                          return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            labels[i],
+                            style: const TextStyle(
+                                fontSize: 10, color: NHColors.gray500),
+                          ),
+                        );
+                      },
+                    ),
                   ),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                      spots: joySpots,
+                      isCurved: true,
+                      color: NHColors.joy,
+                      barWidth: 2),
+                  LineChartBarData(
+                      spots: fearSpots,
+                      isCurved: true,
+                      color: NHColors.fear,
+                      barWidth: 2),
+                  LineChartBarData(
+                      spots: sadnessSpots,
+                      isCurved: true,
+                      color: NHColors.sadness,
+                      barWidth: 2),
+                  LineChartBarData(
+                      spots: angerSpots,
+                      isCurved: true,
+                      color: NHColors.anger,
+                      barWidth: 2),
+                  LineChartBarData(
+                      spots: disgustSpots,
+                      isCurved: true,
+                      color: NHColors.disgust,
+                      barWidth: 2),
                 ],
+                borderData: FlBorderData(show: true),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    tooltipBgColor: Colors.white,
+                    getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
+                      final emotion = s.barIndex == 0
+                          ? '기쁨이'
+                          : s.barIndex == 1
+                              ? '불안이'
+                              : s.barIndex == 2
+                                  ? '슬픔이'
+                                  : s.barIndex == 3
+                                      ? '버럭이'
+                                      : '까칠이';
+                      return LineTooltipItem(
+                        '$emotion ${s.y.toInt()}%',
+                        const TextStyle(fontSize: 11, color: NHColors.gray800),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 10,
+            runSpacing: 6,
+            children: [
+              _legendItemWithIcon(
+                  '기쁨이', NHColors.joy, EmotionAssets.pathByEmoji('😊')),
+              _legendItemWithIcon(
+                  '불안이', NHColors.fear, EmotionAssets.pathByEmoji('😰')),
+              _legendItemWithIcon(
+                  '슬픔이', NHColors.sadness, EmotionAssets.pathByEmoji('😢')),
+              _legendItemWithIcon(
+                  '버럭이', NHColors.anger, EmotionAssets.pathByEmoji('😡')),
+              _legendItemWithIcon(
+                  '까칠이', NHColors.disgust, EmotionAssets.pathByEmoji('🤢')),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmotionBar(String emoji, int percentage, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 12)),
-          const SizedBox(height: 4),
-          Container(
-            height: 40,
-            width: double.infinity,
+  Widget _legendItem(String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+            width: 10,
+            height: 10,
             decoration: BoxDecoration(
-              color: NHColors.gray200,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.bottomCenter,
-              heightFactor: percentage / 100,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '$percentage%',
-            style: const TextStyle(fontSize: 10, color: NHColors.gray500),
-          ),
-        ],
-      ),
+                color: color, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(width: 6),
+        Text(label,
+            style: const TextStyle(fontSize: 11, color: NHColors.gray600)),
+      ],
     );
   }
+
+  Widget _legendItemWithIcon(String label, Color color, String? assetPath) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (assetPath != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Image.asset(assetPath, width: 16, height: 16),
+          ),
+        _legendItem(label, color),
+      ],
+    );
+  }
+
+  // (old bar helper removed)
 
   Widget _buildSuccessPatterns() {
     return Container(

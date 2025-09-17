@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'screens/home/nh_home_screen.dart';
 import 'utils/colors.dart';
 import 'utils/constants.dart';
@@ -76,7 +75,7 @@ class NHTimeCapsuleApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
         ),
-        fontFamily: 'Pretendard',
+        // 시스템 기본 폰트를 사용하여 누락된 글리프 경고 방지
       ),
       home: const NHHomeScreen(),
     );

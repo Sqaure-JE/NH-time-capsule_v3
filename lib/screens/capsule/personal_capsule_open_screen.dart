@@ -3,6 +3,7 @@ import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/nh_header_widget.dart';
 import '../../models/time_capsule.dart';
+import '../../utils/emotion_assets.dart';
 import 'capsule_content_screen.dart';
 
 class PersonalCapsuleOpenScreen extends StatefulWidget {
@@ -147,20 +148,19 @@ class _PersonalCapsuleOpenScreenState extends State<PersonalCapsuleOpenScreen>
                         duration: const Duration(milliseconds: 800),
                         transitionBuilder:
                             (Widget child, Animation<double> animation) {
-                              return ScaleTransition(
-                                scale: Tween<double>(begin: 0.9, end: 1.0)
-                                    .animate(
-                                      CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.bounceOut,
-                                      ),
-                                    ),
-                                child: FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                ),
-                              );
-                            },
+                          return ScaleTransition(
+                            scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.bounceOut,
+                              ),
+                            ),
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
+                          );
+                        },
                         child: Container(
                           key: ValueKey<bool>(showImages),
                           width: 280,
@@ -452,7 +452,13 @@ class _PersonalCapsuleOpenScreenState extends State<PersonalCapsuleOpenScreen>
       ),
       child: Column(
         children: [
-          Text(mainEmotion.emoji, style: const TextStyle(fontSize: 48)),
+          (EmotionAssets.pathByEmoji(mainEmotion.emoji) != null)
+              ? Image.asset(
+                  EmotionAssets.pathByEmoji(mainEmotion.emoji)!,
+                  width: 48,
+                  height: 48,
+                )
+              : Text(mainEmotion.emoji, style: const TextStyle(fontSize: 48)),
           const SizedBox(height: 12),
           Text(
             '${mainEmotion.name} ${mainEmotion.growth}',
@@ -660,7 +666,14 @@ class _PersonalCapsuleOpenScreenState extends State<PersonalCapsuleOpenScreen>
               ),
               child: Row(
                 children: [
-                  Text(highlight.emotion, style: const TextStyle(fontSize: 24)),
+                  (EmotionAssets.pathByEmoji(highlight.emotion) != null)
+                      ? Image.asset(
+                          EmotionAssets.pathByEmoji(highlight.emotion)!,
+                          width: 24,
+                          height: 24,
+                        )
+                      : Text(highlight.emotion,
+                          style: const TextStyle(fontSize: 24)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -931,8 +944,8 @@ class _PersonalCapsuleOpenScreenState extends State<PersonalCapsuleOpenScreen>
     final number = int.tryParse(value.toString());
     if (number == null) return value.toString();
     return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 }

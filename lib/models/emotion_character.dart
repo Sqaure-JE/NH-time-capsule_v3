@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../utils/emotion_assets.dart';
+
 class EmotionCharacter {
   final String id;
-  final String emoji;
+  final String emoji; // 기존 텍스트 이모지 유지 (호환)
   final String name;
   final Color color;
   final String description;
@@ -80,57 +82,63 @@ class EmotionCharacter {
 
   // 기본 감정 캐릭터들 생성
   static List<EmotionCharacter> get defaultCharacters => [
-    EmotionCharacter(
-      id: 'joy',
-      emoji: '😊',
-      name: '기쁨이',
-      color: const Color(0xFFFFD700),
-      description: '목표에 한 걸음 더 가까워졌어요!',
-      level: 3,
-      exp: 100,
-      maxExp: 150,
-    ),
-    EmotionCharacter(
-      id: 'sadness',
-      emoji: '😢',
-      name: '슬픔이',
-      color: const Color(0xFF4A90E2),
-      description: '힘든 순간도 성장의 기회예요.',
-      level: 5,
-      exp: 120,
-      maxExp: 150,
-    ),
-    EmotionCharacter(
-      id: 'anger',
-      emoji: '😡',
-      name: '분노',
-      color: const Color(0xFFFF4444),
-      description: '불합리한 지출에 단호하게 대처해요.',
-      level: 2,
-      exp: 75,
-      maxExp: 150,
-    ),
-    EmotionCharacter(
-      id: 'fear',
-      emoji: '😰',
-      name: '불안이',
-      color: const Color(0xFF9B59B6),
-      description: '신중한 계획으로 안전하게 진행해요.',
-      level: 7,
-      exp: 130,
-      maxExp: 150,
-    ),
-    EmotionCharacter(
-      id: 'disgust',
-      emoji: '🤢',
-      name: '까칠이',
-      color: const Color(0xFF2ECC71),
-      description: '완벽한 목표 달성을 위해 꼼꼼히!',
-      level: 4,
-      exp: 110,
-      maxExp: 150,
-    ),
-  ];
+        EmotionCharacter(
+          id: 'joy',
+          emoji: '😊',
+          name: '기쁨이',
+          color: const Color(0xFFFFD700),
+          description: '목표에 한 걸음 더 가까워졌어요!',
+          level: 3,
+          exp: 100,
+          maxExp: 150,
+        ),
+        EmotionCharacter(
+          id: 'sadness',
+          emoji: '😢',
+          name: '슬픔이',
+          color: const Color(0xFF4A90E2),
+          description: '힘든 순간도 성장의 기회예요.',
+          level: 5,
+          exp: 120,
+          maxExp: 150,
+        ),
+        EmotionCharacter(
+          id: 'anger',
+          emoji: '😡',
+          name: '분노',
+          color: const Color(0xFFFF4444),
+          description: '불합리한 지출에 단호하게 대처해요.',
+          level: 2,
+          exp: 75,
+          maxExp: 150,
+        ),
+        EmotionCharacter(
+          id: 'fear',
+          emoji: '😰',
+          name: '불안이',
+          color: const Color(0xFF9B59B6),
+          description: '신중한 계획으로 안전하게 진행해요.',
+          level: 7,
+          exp: 130,
+          maxExp: 150,
+        ),
+        EmotionCharacter(
+          id: 'disgust',
+          emoji: '🤢',
+          name: '까칠이',
+          color: const Color(0xFF2ECC71),
+          description: '완벽한 목표 달성을 위해 꼼꼼히!',
+          level: 4,
+          exp: 110,
+          maxExp: 150,
+        ),
+      ];
+
+  // 에셋 이미지 경로 제공 (이름/이모지/아이디 기반 매핑)
+  String? get assetPath =>
+      EmotionAssets.pathById(id) ??
+      EmotionAssets.pathByName(name) ??
+      EmotionAssets.pathByEmoji(emoji);
 
   // ID로 캐릭터 찾기
   static EmotionCharacter? findById(
